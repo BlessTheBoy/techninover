@@ -1,12 +1,26 @@
+"use client";
+
 import Search from "@/components/ui/Search";
 import LeftArrow from "@/components/ui/svgs/left-arrow";
-import Plus from "@/components/ui/svgs/plus";
 import RightArrow from "@/components/ui/svgs/right-arrow";
-import TaskCard from "@/components/ui/TaskCard";
 import { Task } from "@/types";
-import Link from "next/link";
+import {
+  closestCorners,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragOverEvent,
+} from "@dnd-kit/core";
+import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { useState } from "react";
+import TodoColumn from "@/components/ui/TodoColumn";
+import InProgressColumn from "@/components/ui/InProgressColumn";
+import CompletedColumn from "@/components/ui/CompletedColumn";
 
-const todoTasks: Task[] = [
+const todoTasksData: Task[] = [
   {
     priority: "high",
     id: 1,
@@ -20,80 +34,172 @@ const todoTasks: Task[] = [
   {
     id: 2,
     priority: "medium",
-    title: "Create a new design",
+    title: "Home Renovation",
+    description:
+      "Write a blog post outlining the top 10 productivity tips for busy professionals.",
     status: "todo",
     deadline: "2024-08-28T13:34:43.051Z",
   },
   {
     id: 3,
+    priority: "high",
+    title: "Organize a charity event",
+    status: "todo",
+    deadline: "2024-08-28T13:34:43.051Z",
+  },
+];
+
+const inProgressTasksData: Task[] = [
+  {
+    id: 7,
     priority: "low",
-    title: "Create a new design",
-    status: "todo",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 4,
-    title: "Create a new design",
-    status: "todo",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 5,
-    title: "Create a new design",
-    status: "todo",
-    deadline: "2024-08-31T13:34:43.051Z",
-  },
-  {
-    id: 6,
-    title: "Create a new design",
-    status: "todo",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-];
-
-const inProgressTasks: Task[] = [
-  {
-    id: 1,
-    title: "Create a new design",
+    title: "Watch a Frontend Tutorial",
     status: "in-progress",
     deadline: "2024-08-28T13:34:43.051Z",
   },
   {
-    id: 2,
-    title: "Create a new design",
-    status: "in-progress",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 3,
-    title: "Create a new design",
+    id: 8,
+    priority: "medium",
+    title: "Prep my week meal",
+    cover: "/meal-prep.avif",
     status: "in-progress",
     deadline: "2024-08-28T13:34:43.051Z",
   },
 ];
 
-const completedTasks: Task[] = [
+const completedTasksData: Task[] = [
   {
-    id: 1,
-    title: "Create a new design",
+    id: 10,
+    priority: "medium",
+    title: "Read a book",
+    cover: "/books.avif",
     status: "completed",
     deadline: "2024-08-28T13:34:43.051Z",
   },
   {
-    id: 2,
-    title: "Create a new design",
+    id: 11,
+    priority: "low",
+    title: "Improve cards readability",
+    description: "As a team license owner, I want to use multiplied limits",
     status: "completed",
     deadline: "2024-08-28T13:34:43.051Z",
   },
   {
-    id: 3,
-    title: "Create a new design",
+    id: 12,
+    priority: "high",
+    title: "Attend Standup and give updates",
     status: "completed",
     deadline: "2024-08-28T13:34:43.051Z",
   },
 ];
 
 export default function Home() {
+  const [completedTasks, setCompletedTasks] =
+    useState<Task[]>(completedTasksData);
+  const [todoTasks, setTodoTasks] = useState<Task[]>(todoTasksData);
+  const [inProgressTasks, setInProgressTasks] =
+    useState<Task[]>(inProgressTasksData);
+
+  const columns = [
+    { id: "todo", cards: todoTasks.filter(Boolean) },
+    { id: "in-progress", cards: inProgressTasks.filter(Boolean) },
+    { id: "completed", cards: completedTasks.filter(Boolean) },
+  ];
+
+  const findColumn = (
+    unique: string | null
+  ): {
+    id: string;
+    cards: Task[];
+  } | null => {
+    if (!unique) {
+      return null;
+    }
+
+    if (["todo", "in-progress", "completed"].includes(unique)) {
+      return columns.find((c) => c.id === unique) ?? null;
+    }
+    const taskId = Number(unique);
+    const columnId = [
+      ...todoTasks.filter(Boolean),
+      ...inProgressTasks.filter(Boolean),
+      ...completedTasks.filter(Boolean),
+    ].find((task) => task.id === taskId)?.status;
+    return columns.find((c) => c.id === columnId) ?? null;
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over, delta } = event;
+    const activeId = active.id;
+    const overId = over ? over.id : null;
+    const activeColumn = findColumn(activeId as string);
+    const overColumn = findColumn(overId as string);
+    if (!activeColumn || !overColumn || activeColumn === overColumn) {
+      return null;
+    }
+    const activeItems = activeColumn.cards;
+    const overItems = overColumn.cards;
+    const activeIndex = activeItems.findIndex((i) => i.id === activeId);
+    const overIndex = overItems.findIndex((i) => i.id === overId);
+    const newIndex = () => {
+      const putOnBelowLastItem =
+        overIndex === overItems.length - 1 && delta.y > 0;
+      const modifier = putOnBelowLastItem ? 1 : 0;
+      return overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
+    };
+    const newColumns = [...columns].map((c) => {
+      if (c.id === activeColumn.id) {
+        c.cards = activeItems.filter((i) => i.id !== activeId);
+        return c;
+      } else if (c.id === overColumn.id) {
+        c.cards = [
+          ...overItems.slice(0, newIndex()),
+          activeItems[activeIndex],
+          ...overItems.slice(newIndex(), overItems.length),
+        ];
+        return c;
+      } else {
+        return c;
+      }
+    });
+    setTodoTasks(newColumns[0].cards.filter(Boolean));
+    setInProgressTasks(newColumns[1].cards.filter(Boolean));
+    setCompletedTasks(newColumns[2].cards.filter(Boolean));
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    const activeId = active.id;
+    const overId = over ? over.id : null;
+    const activeColumn = findColumn(activeId as string);
+    const overColumn = findColumn(overId as string);
+    if (!activeColumn || !overColumn || activeColumn !== overColumn) {
+      return null;
+    }
+    const activeIndex = activeColumn.cards.findIndex((i) => i.id === activeId);
+    const overIndex = overColumn.cards.findIndex((i) => i.id === overId);
+    if (activeIndex !== overIndex) {
+      const newColumns = [...columns].map((column) => {
+        if (column.id === activeColumn.id) {
+          column.cards = arrayMove(overColumn.cards, activeIndex, overIndex);
+          return column;
+        } else {
+          return column;
+        }
+      });
+      setTodoTasks(newColumns[0].cards.filter(Boolean));
+      setInProgressTasks(newColumns[1].cards.filter(Boolean));
+      setCompletedTasks(newColumns[2].cards.filter(Boolean));
+    }
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const currentDate = new Date();
 
   const day = currentDate.getDate();
@@ -118,71 +224,18 @@ export default function Home() {
         </div>
         <Search className="md:grow-0 md:min-w-60" />
       </div>
-      <div className="mt-8 px-[6px] py-4 grid grid-cols-3 gap-4">
-        <div className="px-2 py-3 rounded-lg bg-gray_5 space-y-4 h-fit">
-          <div className="flex justify-between items-center">
-            <div className="flex gap-2 items-center">
-              <p className="font-inter font-medium text-base">To do</p>
-              <div className="px-[6px] h-6 bg-gray_6 rounded-[0.25rem] font-inter font-medium text-sm text-gray_7 flex justify-center items-center">
-                {todoTasks.length}
-              </div>
-            </div>
-            <Link
-              href="/create?status=todo"
-              className="hover:bg-gray-200 rounded-[0.25rem]"
-            >
-              <Plus />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 gap-4">
-            {todoTasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-          </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+      >
+        <div className="mt-8 px-[6px] py-4 grid grid-cols-3 gap-4">
+          <TodoColumn todoTasks={todoTasks.filter(Boolean)} />
+          <InProgressColumn inProgressTasks={inProgressTasks.filter(Boolean)} />
+          <CompletedColumn completedTasks={completedTasks.filter(Boolean)} />
         </div>
-        <div className="px-2 py-3 rounded-lg bg-gray_5 space-y-4 h-fit">
-          <div className="flex justify-between items-center">
-            <div className="flex gap-2 items-center">
-              <p className="font-inter font-medium text-base">In progress</p>
-              <div className="px-[6px] h-6 bg-gray_6 rounded-[0.25rem] font-inter font-medium text-sm text-gray_7 flex justify-center items-center">
-                {inProgressTasks.length}
-              </div>
-            </div>
-            <Link
-              href={"/create?status=in-progress"}
-              className="hover:bg-gray-200 rounded-[0.25rem]"
-            >
-              <Plus />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 gap-4">
-            {inProgressTasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-          </div>
-        </div>
-        <div className="px-2 py-3 rounded-lg bg-gray_5 space-y-4 h-fit">
-          <div className="flex justify-between items-center">
-            <div className="flex gap-2 items-center">
-              <p className="font-inter font-medium text-base">Completed</p>
-              {/* <div className="px-[6px] h-6 bg-gray_6 rounded-[0.25rem] font-inter font-medium text-sm text-gray_7 flex justify-center items-center">
-                {completedTasks.length}
-              </div> */}
-            </div>
-            <Link
-              href={"/create?status=completed"}
-              className="hover:bg-gray-200 rounded-[0.25rem]"
-            >
-              <Plus />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 gap-4">
-            {completedTasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-          </div>
-        </div>
-      </div>
+      </DndContext>
     </main>
   );
 }

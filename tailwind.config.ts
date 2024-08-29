@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { colors } from "./app/ui/colors";
 
 const config: Config = {
   content: [
@@ -12,6 +13,14 @@ const config: Config = {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      },
+      fontFamily: {
+        inter: ["var(--font-inter)"],
+        sfPro: ["var(--font-sf-pro)"],
+      },
+      colors: {
+        purple: colors.purple,
+        purple_bg: colors.purple_bg,
       },
     },
   },

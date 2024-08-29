@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import SideNav from "./ui/sidenav";
+import { inter, sfPro } from "./ui/fonts";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -16,7 +15,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={`${sfPro.variable} ${inter.className} antialiased`}>
+        <div className="flex h-screen flex-col md:flex-row md:overflow-hidden bg-white bg-purple bg">
+          <div className="w-full flex-none md:w-[17.25rem]">
+            <SideNav />
+          </div>
+          <div className="flex-grow p-6 md:overflow-y-auto md:p-12">
+            {children}
+          </div>
+        </div>
+      </body>
     </html>
   );
 }

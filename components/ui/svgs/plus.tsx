@@ -18,16 +18,16 @@ export default function Plus({ color, ...props }: PlusProps) {
       <path
         d="M12 7.33334V16.6667"
         fill="none"
-        stroke-width="1.33333"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M7.3335 12H16.6668"
         fill="none"
-        stroke-width="1.33333"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

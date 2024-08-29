@@ -2,6 +2,14 @@ import type { Metadata } from "next";
 import "./globals.css";
 import SideNav from "@/components/ui/SideNav";
 import { inter, sfPro } from "@/components/ui/fonts";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -10,8 +18,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode;
+  modal: React.ReactNode;
 }>) {
   return (
     <html lang="en">
@@ -22,6 +32,7 @@ export default function RootLayout({
           </div>
           <div className="flex-grow md:overflow-y-auto">{children}</div>
         </div>
+        {modal}
       </body>
     </html>
   );

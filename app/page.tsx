@@ -4,6 +4,7 @@ import Plus from "@/components/ui/svgs/plus";
 import RightArrow from "@/components/ui/svgs/right-arrow";
 import TaskCard from "@/components/ui/TaskCard";
 import { Task } from "@/types";
+import Link from "next/link";
 
 const todoTasks: Task[] = [
   {
@@ -126,9 +127,12 @@ export default function Home() {
                 {todoTasks.length}
               </div>
             </div>
-            <button className="hover:bg-gray-200 rounded-[0.25rem]">
+            <Link
+              href="/create?status=todo"
+              className="hover:bg-gray-200 rounded-[0.25rem]"
+            >
               <Plus />
-            </button>
+            </Link>
           </div>
           <div className="grid grid-cols-1 gap-4">
             {todoTasks.map((task) => (
@@ -144,9 +148,12 @@ export default function Home() {
                 {inProgressTasks.length}
               </div>
             </div>
-            <button className="hover:bg-gray-200 rounded-[0.25rem]">
+            <Link
+              href={"/create?status=in-progress"}
+              className="hover:bg-gray-200 rounded-[0.25rem]"
+            >
               <Plus />
-            </button>
+            </Link>
           </div>
           <div className="grid grid-cols-1 gap-4">
             {inProgressTasks.map((task) => (
@@ -158,13 +165,16 @@ export default function Home() {
           <div className="flex justify-between items-center">
             <div className="flex gap-2 items-center">
               <p className="font-inter font-medium text-base">Completed</p>
-              <div className="px-[6px] h-6 bg-gray_6 rounded-[0.25rem] font-inter font-medium text-sm text-gray_7 flex justify-center items-center">
+              {/* <div className="px-[6px] h-6 bg-gray_6 rounded-[0.25rem] font-inter font-medium text-sm text-gray_7 flex justify-center items-center">
                 {completedTasks.length}
-              </div>
+              </div> */}
             </div>
-            <button className="hover:bg-gray-200 rounded-[0.25rem]">
+            <Link
+              href={"/create?status=completed"}
+              className="hover:bg-gray-200 rounded-[0.25rem]"
+            >
               <Plus />
-            </button>
+            </Link>
           </div>
           <div className="grid grid-cols-1 gap-4">
             {completedTasks.map((task) => (

@@ -10,6 +10,7 @@ export const colors = {
     6: "#DDDDDD",
     7: "#6F6F6F",
     8: "#D0D5DD",
+    9: "#667085",
   },
   shadow: "rgba(16, 24, 40, 0.05)",
   success: "#4F9C20",

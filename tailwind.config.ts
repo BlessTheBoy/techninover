@@ -54,6 +54,7 @@ const config = {
         gray_6: colors.gray[6],
         gray_7: colors.gray[7],
         gray_8: colors.gray[8],
+        gray_9: colors.gray[9],
         shadow: colors.shadow,
         success: colors.success,
         success_bg: colors.success_bg,

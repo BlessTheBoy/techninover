@@ -14,7 +14,7 @@ export default function TodoIcon({ color, ...props }: TodoIconProps) {
       fill={color ?? "#65676D"}
       {...props}  
     >
-      <g clip-path="url(#clip0_14_4255)">
+      <g clipPath="url(#clip0_14_4255)">
         <path
           d="M31.875 9.75H4.125V30.375H31.875V9.75Z"
           strokeWidth="2.25"

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import SideNav from "./ui/sidenav";
-import { inter, sfPro } from "./ui/fonts";
+import SideNav from "@/components/ui/SideNav";
+import { inter, sfPro } from "@/components/ui/fonts";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -16,13 +16,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${sfPro.variable} ${inter.className} antialiased`}>
-        <div className="flex h-screen flex-col md:flex-row md:overflow-hidden bg-white bg-purple bg">
+        <div className="flex h-screen flex-col md:flex-row md:overflow-hidden bg-white">
           <div className="w-full flex-none md:w-[17.25rem]">
             <SideNav />
           </div>
-          <div className="flex-grow p-6 md:overflow-y-auto md:p-12">
-            {children}
-          </div>
+          <div className="flex-grow md:overflow-y-auto">{children}</div>
         </div>
       </body>
     </html>

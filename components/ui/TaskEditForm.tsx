@@ -9,6 +9,7 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "./select";
 import clsx from "clsx";
 import ImageUploader from "./ImageUploader";
@@ -92,12 +93,15 @@ export default function TaskEditForm({ id }: { id: number }) {
   }
 
   const [priority, setPriority] = useState<string | undefined>(task.priority);
+  const [status, setStatus] = useState<"todo" | "in-progress" | "completed">(
+    task.status
+  );
   const [image, setImage] = useState<string | undefined>(task.cover);
   const [time, setTime] = useState<Date | undefined>(new Date(task.deadline));
   const [date, setDate] = useState<Date | undefined>(new Date(task.deadline));
 
-  console.log("priority", priority);
-  console.log("task", task);
+  // console.log("priority", priority);
+  // console.log("task", task);
   return (
     <form className="pb-10">
       <div className="space-y-5 mb-12">
@@ -112,11 +116,49 @@ export default function TaskEditForm({ id }: { id: number }) {
           optional
           defaultValue={task.description}
         />
+
+        <div className="grid items-center gap-1.5">
+          <label className="font-inter font-medium text-sm text-text_header">
+            Status
+          </label>
+          <Select
+            onValueChange={(v) =>
+              setStatus(v as "todo" | "in-progress" | "completed")
+            }
+            defaultValue={status}
+          >
+            <SelectTrigger className="h-12 rounded-xl border border-gray_8 placeholder:text-[#848585] w-full px-[14px] outline-purple">
+              <SelectValue placeholder="Select task status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem
+                  value="todo"
+                  className="text-error hover:bg-error_bg"
+                >
+                  To do
+                </SelectItem>
+                <SelectItem
+                  value="in-progress"
+                  className="text-medium hover:bg-medium_bg"
+                >
+                  In progress
+                </SelectItem>
+                <SelectItem
+                  value="completed"
+                  className="text-success hover:text-success hover:bg-success_bg"
+                >
+                  Completed
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="grid items-center gap-1.5">
           <label className="font-inter font-medium text-sm text-text_header">
             Priority
           </label>
-          <Select onValueChange={setPriority}>
+          <Select onValueChange={setPriority} defaultValue={priority}>
             <SelectTrigger className="h-12 rounded-xl border border-gray_8 placeholder:text-[#848585] w-full px-[14px] outline-purple">
               {priority ? (
                 <div

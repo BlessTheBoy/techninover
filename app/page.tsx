@@ -293,7 +293,7 @@ export default function Home() {
             [oldStatus]: items[oldStatus].filter((i) => i.id !== active.id),
             [newStatus]: [
               ...items[newStatus].slice(0, newIndex),
-              items.todo[oldIndex],
+              { ...items[oldStatus][oldIndex], status: newStatus },
               ...items[newStatus].slice(newIndex),
             ],
           };
@@ -332,28 +332,9 @@ export default function Home() {
       [activeColumn]: activeItems.filter((i) => i.id !== activeId),
       [overColumn]: [
         ...overItems.slice(0, newIndex()),
-        activeItems[activeIndex],
+        { ...activeItems[activeIndex], status: overColumn },
         ...overItems.slice(newIndex(), overItems.length),
       ],
     }));
-
-    // const newColumns = [...columns].map((c) => {
-    //   if (c.id === activeColumn.id) {
-    //     c.cards = activeItems.filter((i) => i.id !== activeId);
-    //     return c;
-    //   } else if (c.id === overColumn.id) {
-    //     c.cards = [
-    //       ...overItems.slice(0, newIndex()),
-    //       activeItems[activeIndex],
-    //       ...overItems.slice(newIndex(), overItems.length),
-    //     ];
-    //     return c;
-    //   } else {
-    //     return c;
-    //   }
-    // });
-    // setTodoTasks(newColumns[0].cards.filter(Boolean));
-    // setInProgressTasks(newColumns[1].cards.filter(Boolean));
-    // setCompletedTasks(newColumns[2].cards.filter(Boolean));
   }
 }

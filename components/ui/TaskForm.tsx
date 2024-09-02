@@ -8,23 +8,23 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
-  SelectValue,
 } from "./select";
 import clsx from "clsx";
 import ImageUploader from "./ImageUploader";
 import { DatePicker } from "./DatePicker";
 import { TimePicker } from "./TimePicker";
 import { Button } from "./button";
+import { useParams } from "next/navigation";
 
 export default function TaskForm() {
+  const { initialStatus } = useParams();
   const [priority, setPriority] = useState<string | undefined>();
   const [image, setImage] = useState<string | undefined>();
   const [time, setTime] = useState<Date | undefined>();
   const [date, setDate] = useState<Date | undefined>();
 
-  console.log("priority", priority);
+  // console.log("priority", priority);
   return (
     <form className="pb-10">
       <div className="space-y-5 mb-12">

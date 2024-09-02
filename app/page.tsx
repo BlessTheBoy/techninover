@@ -196,7 +196,7 @@ export default function Home() {
         </div>
         <div></div>
       </main>
-      <main>
+      <main className="block md:hidden">
         <div className="flex border-b border-gray-400 px-2 sticky top-0">
           <div
             className={clsx(

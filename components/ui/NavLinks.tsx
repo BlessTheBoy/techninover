@@ -66,7 +66,7 @@ export default function NavLinks() {
                 }
               )}
             />
-            <p className="hidden md:block font-sfPro font-semibold text-lg">
+            <p className="hidden lg:block font-sfPro font-semibold text-lg">
               {link.name}
             </p>
           </Link>

@@ -17,12 +17,8 @@ import {
 } from "@dnd-kit/core";
 import {
   arrayMove,
-  SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-
-import { SortableItem } from "../components/ui/SortableItem";
 import TaskCard from "@/components/ui/TaskCard";
 import LeftArrow from "@/components/ui/svgs/left-arrow";
 import RightArrow from "@/components/ui/svgs/right-arrow";
@@ -31,6 +27,8 @@ import { Task } from "@/types";
 import TodoColumn from "@/components/ui/TodoColumn";
 import InProgressColumn from "@/components/ui/InProgressColumn";
 import CompletedColumn from "@/components/ui/CompletedColumn";
+import Link from "next/link";
+import Image from "next/image";
 
 const todoTasksData: Task[] = [
   {
@@ -143,6 +141,9 @@ export default function Home() {
 
   return (
     <main className="px-3 py-6 md:py-10 md:px-8">
+      <Link className="hidden md:block lg:hidden w-fit mb-6" href="/">
+        <Image src="/techinnover.png" alt="Acme Logo" width={180} height={44} />
+      </Link>
       <div className="space-y-4 md:space-y-0 md:flex items-center justify-between">
         <div className="flex items-center gap-4">
           <p className="font-sfPro font-semibold text-xl md:text-3xl grow md:flex-grow-0">

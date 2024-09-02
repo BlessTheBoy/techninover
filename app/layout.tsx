@@ -2,14 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import SideNav from "@/components/ui/SideNav";
 import { inter, sfPro } from "@/components/ui/fonts";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -27,10 +19,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${sfPro.variable} ${inter.className} antialiased`}>
         <div className="flex h-screen flex-col md:flex-row md:overflow-hidden bg-white">
-          <div className="w-full flex-none md:w-[17.25rem]">
+          <div className="w-full flex-none md:w-fit lg:w-[17.25rem]">
             <SideNav />
           </div>
-          <div className="flex-grow md:overflow-y-auto">{children}</div>
+          <div className="flex-grow md:overflow-y-auto">
+            
+            {children}
+          </div>
         </div>
         {modal}
       </body>

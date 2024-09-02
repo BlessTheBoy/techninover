@@ -15,10 +15,7 @@ import {
   DragEndEvent,
   DragStartEvent,
 } from "@dnd-kit/core";
-import {
-  arrayMove,
-  sortableKeyboardCoordinates,
-} from "@dnd-kit/sortable";
+import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import TaskCard from "@/components/ui/TaskCard";
 import LeftArrow from "@/components/ui/svgs/left-arrow";
 import RightArrow from "@/components/ui/svgs/right-arrow";
@@ -29,6 +26,8 @@ import InProgressColumn from "@/components/ui/InProgressColumn";
 import CompletedColumn from "@/components/ui/CompletedColumn";
 import Link from "next/link";
 import Image from "next/image";
+import clsx from "clsx";
+import MobileTaskCard from "@/components/ui/MobileTaskCard";
 
 const todoTasksData: Task[] = [
   {
@@ -105,6 +104,9 @@ const completedTasksData: Task[] = [
 
 export default function Home() {
   const [activeTask, setActiveTask] = useState<Task | undefined>();
+  const [activeColumn, setActiveColumn] = useState<
+    "todo" | "in-progress" | "completed"
+  >("todo");
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -140,50 +142,122 @@ export default function Home() {
   const formattedDate = `${day} ${month} ${year}`;
 
   return (
-    <main className="px-3 py-6 md:py-10 md:px-8">
-      <Link className="hidden md:block lg:hidden w-fit mb-6" href="/">
-        <Image src="/techinnover.png" alt="Acme Logo" width={180} height={44} />
-      </Link>
-      <div className="space-y-4 md:space-y-0 md:flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <p className="font-sfPro font-semibold text-xl md:text-3xl grow md:flex-grow-0">
-            {formattedDate}
-          </p>
-          <div className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100">
-            <LeftArrow />
+    <>
+      <main className="px-3 py-6 md:py-10 md:px-8">
+        <Link className="hidden md:block lg:hidden w-fit mb-6" href="/">
+          <Image
+            src="/techinnover.png"
+            alt="Acme Logo"
+            width={180}
+            height={44}
+          />
+        </Link>
+        <div className="space-y-4 md:space-y-0 md:flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <p className="font-sfPro font-semibold text-xl md:text-3xl grow md:flex-grow-0">
+              {formattedDate}
+            </p>
+            <div className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100">
+              <LeftArrow />
+            </div>
+            <div className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100">
+              <RightArrow />
+            </div>
           </div>
-          <div className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100">
-            <RightArrow />
+          <Search className="md:grow-0 md:min-w-60" />
+        </div>
+
+        <div className="hidden md:block">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragOver={handleDragOver}
+          >
+            <div className="mt-8 px-[6px] py-4 grid grid-cols-3 gap-4">
+              <TodoColumn
+                todoTasks={tasks.todo.filter(Boolean)}
+                activeId={activeTask?.id}
+              />
+              <InProgressColumn
+                inProgressTasks={tasks["in-progress"].filter(Boolean)}
+                activeId={activeTask?.id}
+              />
+              <CompletedColumn
+                completedTasks={tasks.completed.filter(Boolean)}
+                activeId={activeTask?.id}
+              />
+            </div>
+            <DragOverlay>
+              {activeTask ? <TaskCard task={activeTask} /> : null}
+            </DragOverlay>
+          </DndContext>
+        </div>
+        <div></div>
+      </main>
+      <main>
+        <div className="flex border-b border-gray-400 px-2 sticky top-0">
+          <div
+            className={clsx(
+              "flex-1 flex gap-2 items-center justify-center py-2 rounded-t mb-[-2px] cursor-pointer",
+              {
+                "bg-purple_bg text-purple border-b-[3px] border-purple":
+                  activeColumn === "todo",
+              }
+            )}
+            onClick={() => setActiveColumn("todo")}
+          >
+            <p className="font-inter font-medium text-sm">To do</p>
+            <div
+              className={clsx(
+                "px-[4px] h-5 bg-gray_6 rounded-[0.25rem] font-inter font-medium text-xs text-gray_7 flex justify-center items-center",
+                { "text-white bg-purple": activeColumn === "todo" }
+              )}
+            >
+              {tasks.todo.length}
+            </div>
+          </div>
+          <div
+            className={clsx(
+              "flex-1 flex gap-2 items-center justify-center py-2 rounded-t mb-[-2px] cursor-pointer",
+              {
+                "bg-purple_bg text-purple border-b-[3px] border-purple":
+                  activeColumn === "in-progress",
+              }
+            )}
+            onClick={() => setActiveColumn("in-progress")}
+          >
+            <p className="font-inter font-medium text-sm">In progress</p>
+            <div
+              className={clsx(
+                "px-[4px] h-5 bg-gray_6 rounded-[0.25rem] font-inter font-medium text-xs text-gray_7 flex justify-center items-center",
+                { "text-white bg-purple": activeColumn === "in-progress" }
+              )}
+            >
+              {tasks["in-progress"].length}
+            </div>
+          </div>
+          <div
+            className={clsx(
+              "flex-1 flex gap-2 items-center justify-center py-2 rounded-t mb-[-2px] cursor-pointer",
+              {
+                "bg-purple_bg text-purple border-b-[3px] border-purple":
+                  activeColumn === "completed",
+              }
+            )}
+            onClick={() => setActiveColumn("completed")}
+          >
+            <p className="font-inter font-medium text-sm">Completed</p>
           </div>
         </div>
-        <Search className="md:grow-0 md:min-w-60" />
-      </div>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragOver={handleDragOver}
-      >
-        <div className="mt-8 px-[6px] py-4 grid grid-cols-3 gap-4">
-          <TodoColumn
-            todoTasks={tasks.todo.filter(Boolean)}
-            activeId={activeTask?.id}
-          />
-          <InProgressColumn
-            inProgressTasks={tasks["in-progress"].filter(Boolean)}
-            activeId={activeTask?.id}
-          />
-          <CompletedColumn
-            completedTasks={tasks.completed.filter(Boolean)}
-            activeId={activeTask?.id}
-          />
+        <div className="space-y-4 pb-6">
+          {tasks[activeColumn].map((task) => (
+            <MobileTaskCard key={task.id} task={task} />
+          ))}
         </div>
-        <DragOverlay>
-          {activeTask ? <TaskCard task={activeTask} /> : null}
-        </DragOverlay>
-      </DndContext>
-    </main>
+      </main>
+    </>
   );
 
   function handleDragStart(event: DragStartEvent) {

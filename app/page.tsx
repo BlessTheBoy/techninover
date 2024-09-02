@@ -11,6 +11,9 @@ import {
   useSensors,
   MouseSensor,
   TouchSensor,
+  DragOverEvent,
+  DragEndEvent,
+  DragStartEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -159,6 +162,7 @@ export default function Home() {
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
       >
         <div className="mt-8 px-[6px] py-4 grid grid-cols-3 gap-4">
           <TodoColumn
@@ -181,27 +185,27 @@ export default function Home() {
     </main>
   );
 
-  function handleDragStart(event: any) {
+  function handleDragStart(event: DragStartEvent) {
     const { active } = event;
     // console.log("active", active);
-    const status = active.data.current.sortable
+    const status = active.data.current?.sortable
       .containerId as keyof typeof tasks;
 
     setActiveTask(tasks[status].find((i) => i.id === active.id));
   }
 
-  function handleDragEnd(event: any) {
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     // console.log("active.id, over.id", active, over);
 
-    if (active.id !== over.id) {
+    if (over && active.id !== over?.id) {
       setTasks((items) => {
-        const oldStatus = active.data.current.sortable
+        const oldStatus = active.data.current?.sortable
           .containerId as keyof typeof items;
-        const newStatus = over.data.current.sortable
+        const newStatus = over?.data.current?.sortable
           .containerId as keyof typeof items;
         const oldIndex = items[oldStatus].findIndex((i) => i.id === active.id);
-        const newIndex = items[newStatus].findIndex((i) => i.id === over.id);
+        const newIndex = items[newStatus].findIndex((i) => i.id === over?.id);
 
         if (oldStatus === newStatus) {
           return {
@@ -223,5 +227,58 @@ export default function Home() {
     }
 
     setActiveTask(undefined);
+  }
+
+  function handleDragOver(event: DragOverEvent) {
+    const { active, over, delta } = event;
+    const activeId = active.id;
+    const overId = over ? over.id : null;
+    const activeColumn = active.data.current?.sortable
+      .containerId as keyof typeof tasks;
+    const overColumn = over?.data.current?.sortable
+      .containerId as keyof typeof tasks;
+
+    if (!activeColumn || !overColumn || activeColumn === overColumn) {
+      return null;
+    }
+    const activeItems = tasks[activeColumn];
+    const overItems = tasks[overColumn];
+    const activeIndex = activeItems.findIndex((i) => i.id === activeId);
+    const overIndex = overItems.findIndex((i) => i.id === overId);
+    const newIndex = () => {
+      const putOnBelowLastItem =
+        overIndex === overItems.length - 1 && delta.y > 0;
+      const modifier = putOnBelowLastItem ? 1 : 0;
+      return overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
+    };
+
+    setTasks((items) => ({
+      ...items,
+      [activeColumn]: activeItems.filter((i) => i.id !== activeId),
+      [overColumn]: [
+        ...overItems.slice(0, newIndex()),
+        activeItems[activeIndex],
+        ...overItems.slice(newIndex(), overItems.length),
+      ],
+    }));
+
+    // const newColumns = [...columns].map((c) => {
+    //   if (c.id === activeColumn.id) {
+    //     c.cards = activeItems.filter((i) => i.id !== activeId);
+    //     return c;
+    //   } else if (c.id === overColumn.id) {
+    //     c.cards = [
+    //       ...overItems.slice(0, newIndex()),
+    //       activeItems[activeIndex],
+    //       ...overItems.slice(newIndex(), overItems.length),
+    //     ];
+    //     return c;
+    //   } else {
+    //     return c;
+    //   }
+    // });
+    // setTodoTasks(newColumns[0].cards.filter(Boolean));
+    // setInProgressTasks(newColumns[1].cards.filter(Boolean));
+    // setCompletedTasks(newColumns[2].cards.filter(Boolean));
   }
 }

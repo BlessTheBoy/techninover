@@ -1,12 +1,19 @@
-import Link from 'next/link';
-import React from 'react'
-import Plus from './svgs/plus';
-import TaskCard from './TaskCard';
-import { Task } from '@/types';
+import Link from "next/link";
+import React from "react";
+import Plus from "./svgs/plus";
+import TaskCard from "./TaskCard";
+import { Task } from "@/types";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
+import { SortableItem } from "./SortableItem";
 
-export default function InProgressColumn({inProgressTasks}: {inProgressTasks: Task[]}) {
+export default function InProgressColumn({
+  inProgressTasks,
+  activeId,
+}: {
+  inProgressTasks: Task[];
+  activeId: number | undefined;
+}) {
   const { setNodeRef } = useDroppable({ id: "in-progress" });
   return (
     <div className="px-2 py-3 rounded-lg bg-gray_5 space-y-4 h-fit">
@@ -32,7 +39,11 @@ export default function InProgressColumn({inProgressTasks}: {inProgressTasks: Ta
       >
         <div className="grid grid-cols-1 gap-4" ref={setNodeRef}>
           {inProgressTasks.map((task) => (
-            <TaskCard key={task.id} task={task} />
+            <SortableItem
+              key={task.id}
+              active={task.id == activeId}
+              task={task}
+            />
           ))}
         </div>
       </SortableContext>

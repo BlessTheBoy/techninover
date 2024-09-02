@@ -1,12 +1,21 @@
 import Link from "next/link";
 import React from "react";
 import Plus from "./svgs/plus";
-import TaskCard from "./TaskCard";
 import { Task } from "@/types";
-import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
+import { SortableItem } from "@/components/ui/SortableItem";
 
-export default function TodoColumn({ todoTasks }: { todoTasks: Task[] }) {
+export default function TodoColumn({
+  todoTasks,
+  activeId,
+}: {
+  todoTasks: Task[];
+  activeId: number | undefined;
+}) {
   const { setNodeRef } = useDroppable({ id: "todo" });
   return (
     <div className="px-2 py-3 rounded-lg bg-gray_5 space-y-4 h-fit">
@@ -24,17 +33,21 @@ export default function TodoColumn({ todoTasks }: { todoTasks: Task[] }) {
           <Plus />
         </Link>
       </div>
-      <SortableContext
-        id={"todo"}
-        items={todoTasks}
-        strategy={rectSortingStrategy}
-      >
-        <div className="grid grid-cols-1 gap-4" ref={setNodeRef}>
+      <div className="space-y-4" ref={setNodeRef}>
+        <SortableContext
+          id={"todo"}
+          items={todoTasks}
+          strategy={verticalListSortingStrategy}
+        >
           {todoTasks.map((task) => (
-            <TaskCard key={task.id} task={task} />
+            <SortableItem
+              key={task.id}
+              active={task.id == activeId}
+              task={task}
+            />
           ))}
-        </div>
-      </SortableContext>
+        </SortableContext>
+      </div>
     </div>
   );
 }

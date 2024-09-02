@@ -5,11 +5,14 @@ import TaskCard from "./TaskCard";
 import { Task } from "@/types";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
+import { SortableItem } from "./SortableItem";
 
 export default function CompletedColumn({
   completedTasks,
+  activeId,
 }: {
   completedTasks: Task[];
+  activeId: number | undefined;
 }) {
   const { setNodeRef } = useDroppable({ id: "completed" });
   return (
@@ -35,7 +38,11 @@ export default function CompletedColumn({
       >
         <div className="grid grid-cols-1 gap-4" ref={setNodeRef}>
           {completedTasks.map((task) => (
-            <TaskCard key={task.id} task={task} />
+            <SortableItem
+              key={task.id}
+              active={task.id == activeId}
+              task={task}
+            />
           ))}
         </div>
       </SortableContext>

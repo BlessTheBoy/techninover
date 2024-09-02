@@ -28,6 +28,7 @@ import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
 import MobileTaskCard from "@/components/ui/MobileTaskCard";
+import FAB from "@/components/ui/FAB";
 
 const todoTasksData: Task[] = [
   {
@@ -194,10 +195,9 @@ export default function Home() {
             </DragOverlay>
           </DndContext>
         </div>
-        <div></div>
       </main>
       <main className="block md:hidden">
-        <div className="flex border-b border-gray-400 px-2 sticky top-0">
+        <div className="flex border-b border-gray-400 px-2 sticky top-0 bg-white">
           <div
             className={clsx(
               "flex-1 flex gap-2 items-center justify-center py-2 rounded-t mb-[-2px] cursor-pointer",

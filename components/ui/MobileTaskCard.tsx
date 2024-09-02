@@ -9,7 +9,6 @@ import Image from "next/image";
 import Flag from "./svgs/flag";
 import moment from "moment";
 
-
 export default function MobileTaskCard({ task }: { task: Task }) {
   const deadline = new Date(task.deadline);
   const currentDate = new Date();
@@ -48,9 +47,12 @@ export default function MobileTaskCard({ task }: { task: Task }) {
               <MoreHorizontal />
             </PopoverTrigger>
             <PopoverContent className="w-fit p-0 border border-gray_8">
-              <button className="w-full px-3 py-1 text-sm text-text_paragraph text-left hover:bg-gray-100">
+              <a
+                href={`task/${task.id}/edit`}
+                className="block w-full px-3 py-1 text-sm text-text_paragraph text-left hover:bg-gray-100"
+              >
                 Edit
-              </button>
+              </a>
               <button className="w-full px-3 py-1 text-sm text-danger text-left hover:bg-gray-100">
                 Delete
               </button>

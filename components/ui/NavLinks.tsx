@@ -54,7 +54,9 @@ export default function NavLinks() {
               "group flex h-[48px] md:h-auto grow items-center justify-center gap-5 rounded-md p-3 text-sm font-medium hover:bg-purple_bg hover:text-purple md:flex-none md:justify-start md:p-5 md:rounded-none",
               {
                 "bg-purple_bg text-purple md:border-r-[6px] border-purple":
-                  pathname === link.href,
+                  pathname === link.href ||
+                  (link.href === "/" &&
+                    !["/inbox", "/notes", "/todo"].includes(pathname)),
               }
             )}
           >

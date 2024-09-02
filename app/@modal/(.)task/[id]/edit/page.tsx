@@ -3,16 +3,14 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import TaskForm from "@/components/ui/TaskForm";
+import TaskEditForm from "@/components/ui/TaskEditForm";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function Page() {
+export default function Page({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -42,17 +40,14 @@ export default function Page() {
   }
 
   return (
-    <Dialog
-      defaultOpen
-      onOpenChange={() => router.back()}
-    >
+    <Dialog defaultOpen onOpenChange={() => router.back()}>
       <DialogContent className="max-h-[90vh] overflow-auto">
         <DialogHeader>
           <DialogTitle className="font-sfPro font-semibold text-2xl">
-            Add Task
+            Edit Task
           </DialogTitle>
         </DialogHeader>
-        <TaskForm />
+        <TaskEditForm id={Number(params.id)} />
       </DialogContent>
     </Dialog>
   );

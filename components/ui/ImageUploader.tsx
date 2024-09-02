@@ -12,14 +12,14 @@ export default function ImageUploader({
   label,
   optional,
 }: {
-  image: string | null;
-  setImage: (image: string | null) => void;
+  image: string | undefined;
+  setImage: (image: string | undefined) => void;
   label?: string;
   optional?: boolean;
 }) {
   const [dragActive, setDragActive] = useState(false);
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [fileSize, setFileSize] = useState<number | null>(null);
+  const [fileName, setFileName] = useState<string | undefined>(undefined);
+  const [fileSize, setFileSize] = useState<number | undefined>(undefined);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -112,15 +112,15 @@ export default function ImageUploader({
                 <p className="font-inter font-medium text-sm text-[#344054] text-ellipsis line-clamp-2">
                   {fileName ?? "Cover image"}
                 </p>
-                <p className="font-inter font-normal text-sm text-gray_9">
-                  {formatFileSize(fileSize as number)}
-                </p>
+                {fileSize ?<p className="font-inter font-normal text-sm text-gray_9">
+                  {formatFileSize(fileSize)}
+                </p> : null}
               </div>
               <button
                 onClick={() => {
-                  setImage(null);
-                  setFileName(null);
-                  setFileSize(null);
+                  setImage(undefined);
+                  setFileName(undefined);
+                  setFileSize(undefined);
                 }}
                 className="group flex items-center justify-center h-6 w-6 rounded hover:bg-error_bg self-center border border-gray_6"
               >

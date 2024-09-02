@@ -10,6 +10,7 @@ import Flag from "./svgs/flag";
 import moment from "moment";
 import { DraggableAttributes } from "@dnd-kit/core";
 import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
+import Link from "next/link";
 
 export default function TaskCard({
   task,
@@ -63,9 +64,12 @@ export default function TaskCard({
               <MoreHorizontal />
             </PopoverTrigger>
             <PopoverContent className="w-fit p-0 border border-gray_8">
-              <button className="w-full px-3 py-1 text-sm text-text_paragraph text-left hover:bg-gray-100">
+              <Link
+                href={`task/${task.id}/edit`}
+                className="block w-full px-3 py-1 text-sm text-text_paragraph text-left hover:bg-gray-100"
+              >
                 Edit
-              </button>
+              </Link>
               <button className="w-full px-3 py-1 text-sm text-danger text-left hover:bg-gray-100">
                 Delete
               </button>

@@ -1,4 +1,5 @@
 "use client";
+
 import { Task } from "@/types";
 import clsx from "clsx";
 import React from "react";
@@ -7,9 +8,18 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import Image from "next/image";
 import Flag from "./svgs/flag";
 import moment from "moment";
+import { DraggableAttributes } from "@dnd-kit/core";
+import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 
-
-export default function TaskCard({ task }: { task: Task }) {
+export default function TaskCard({
+  task,
+  attributes,
+  listeners,
+}: {
+  task: Task;
+  attributes?: DraggableAttributes;
+  listeners?: SyntheticListenerMap;
+}) {
   const deadline = new Date(task.deadline);
   const currentDate = new Date();
 
@@ -18,27 +28,33 @@ export default function TaskCard({ task }: { task: Task }) {
       id={String(task.id)}
       className="space-y-4 p-4 rounded-md bg-white shadow-card"
     >
-      {task.priority ? (
-        <p
-          className={clsx(
-            "h-6 px-2 rounded-[0.25rem] flex justify-center items-center font-inter font-medium text-xs w-fit",
-            {
-              "bg-success_bg text-success": task.priority == "high",
-            },
-            {
-              "bg-medium_bg text-medium": task.priority == "medium",
-            },
-            {
-              "bg-error_bg text-error": task.priority == "low",
-            }
-          )}
-        >
-          {task.priority.toUpperCase()}
-        </p>
-      ) : null}
+      <div {...attributes} {...listeners}>
+        {task.priority ? (
+          <p
+            className={clsx(
+              "h-6 px-2 rounded-[0.25rem] flex justify-center items-center font-inter font-medium text-xs w-fit",
+              {
+                "bg-success_bg text-success": task.priority == "high",
+              },
+              {
+                "bg-medium_bg text-medium": task.priority == "medium",
+              },
+              {
+                "bg-error_bg text-error": task.priority == "low",
+              }
+            )}
+          >
+            {task.priority.toUpperCase()}
+          </p>
+        ) : null}
+      </div>
       <div className="space-y-4">
         <div className="flex items-end">
-          <p className="font-sfPro font-medium text-base text-ellipsis line-clamp-2 text-text_header flex-1">
+          <p
+            className="font-sfPro font-medium text-base text-ellipsis line-clamp-2 text-text_header flex-1"
+            {...attributes}
+            {...listeners}
+          >
             {task.title}
           </p>
 
@@ -63,15 +79,21 @@ export default function TaskCard({ task }: { task: Task }) {
             width={800}
             height={400}
             className={`w-full h-auto rounded bg-gray-100`}
+            {...attributes}
+            {...listeners}
           />
         ) : null}
         {task.description ? (
-          <p className="text-sm tracking-tight text-ellipsis line-clamp-5 text-text_paragraph opacity-75">
+          <p
+            className="text-sm tracking-tight text-ellipsis line-clamp-5 text-text_paragraph opacity-75"
+            {...attributes}
+            {...listeners}
+          >
             {task.description}
           </p>
         ) : null}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2" {...attributes} {...listeners}>
         <Flag
           className={clsx(
             {

@@ -96,6 +96,7 @@ export default function ImageUploader({
           className="hidden"
           accept=".jpg,.jpeg,.png"
           onChange={handleChange}
+          name="cover"
         />
         {image ? (
           <div className="flex items-center gap-3">
@@ -112,15 +113,18 @@ export default function ImageUploader({
                 <p className="font-inter font-medium text-sm text-[#344054] text-ellipsis line-clamp-2">
                   {fileName ?? "Cover image"}
                 </p>
-                {fileSize ?<p className="font-inter font-normal text-sm text-gray_9">
-                  {formatFileSize(fileSize)}
-                </p> : null}
+                {fileSize ? (
+                  <p className="font-inter font-normal text-sm text-gray_9">
+                    {formatFileSize(fileSize)}
+                  </p>
+                ) : null}
               </div>
               <button
                 onClick={() => {
                   setImage(undefined);
                   setFileName(undefined);
                   setFileSize(undefined);
+                  inputRef.current!.value = "";
                 }}
                 className="group flex items-center justify-center h-6 w-6 rounded hover:bg-error_bg self-center border border-gray_6"
               >

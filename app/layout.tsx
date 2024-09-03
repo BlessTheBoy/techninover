@@ -3,6 +3,7 @@ import "./globals.css";
 import SideNav from "@/components/ui/SideNav";
 import { inter, sfPro } from "@/components/ui/fonts";
 import FAB from "@/components/ui/FAB";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -29,6 +30,7 @@ export default function RootLayout({
         </div>
         <div className="hidden md:block">{modal}</div>
         <FAB />
+        <Toaster />
       </body>
     </html>
   );

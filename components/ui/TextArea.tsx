@@ -4,9 +4,10 @@ import React, { ReactNode, useId } from 'react'
 interface InputProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: ReactNode;
   optional?: boolean;
+  error?: string;
 }
 
-export default function TextArea({label, className, optional, ...props}: InputProps) {
+export default function TextArea({label, className, optional, error, ...props}: InputProps) {
   const id = useId();
   return (
     <div className="grid items-center gap-1.5">
@@ -16,9 +17,7 @@ export default function TextArea({label, className, optional, ...props}: InputPr
           className="font-inter font-medium text-sm text-text_header"
         >
           {label}{" "}
-          {
-            optional ? <span className='font-normal'>(Optional)</span> : null
-          }
+          {optional ? <span className="font-normal">(Optional)</span> : null}
         </label>
       ) : null}
       <textarea
@@ -29,6 +28,7 @@ export default function TextArea({label, className, optional, ...props}: InputPr
         required={!optional}
         {...props}
       />
+      {error ? <p className="text-error text-xs">{error}</p> : null}
     </div>
   );
 }

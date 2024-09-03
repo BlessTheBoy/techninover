@@ -16,11 +16,13 @@ export function DatePicker({
   setDate,
   label,
   optional,
+  error
 }: {
   date?: Date;
   setDate: (v: Date | undefined) => void;
   label?: React.ReactNode;
   optional?: boolean;
+  error?: string;
 }) {
   return (
     <div className="grid items-center gap-1.5 relative flex-1">
@@ -55,6 +57,7 @@ export function DatePicker({
           />
         </PopoverContent>
       </Popover>
+      {error ? <p className="text-error text-xs">{error}</p> : null}
     </div>
   );
 }

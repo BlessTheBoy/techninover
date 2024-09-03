@@ -10,11 +10,13 @@ export function TimePicker({
   setTime,
   label,
   optional,
+  error
 }: {
   time?: Date;
   setTime: (v: Date | undefined) => void;
   label?: React.ReactNode;
   optional?: boolean;
+  error?: string;
 }) {
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -55,6 +57,7 @@ export function TimePicker({
           <Clock />
         </div>
       </div>
+      {error ? <p className="text-error text-xs">{error}</p> : null}
     </div>
   );
 }

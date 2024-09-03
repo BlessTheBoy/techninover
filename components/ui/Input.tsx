@@ -1,12 +1,19 @@
-"use client"
-import React, { ReactNode, useId } from 'react'
+"use client";
+import React, { ReactNode, useId } from "react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: ReactNode;
   optional?: boolean;
+  error?: string;
 }
 
-export default function Input({label, className, optional, ...props}: InputProps) {
+export default function Input({
+  label,
+  className,
+  optional,
+  error,
+  ...props
+}: InputProps) {
   const id = useId();
   return (
     <div className="grid items-center gap-1.5">
@@ -25,6 +32,7 @@ export default function Input({label, className, optional, ...props}: InputProps
         required={!optional}
         {...props}
       />
+      {error ? <p className="text-error text-xs">{error}</p> : null}
     </div>
   );
 }

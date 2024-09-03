@@ -43,7 +43,7 @@ export default function Page() {
     createTaskHelper,
     {
       onSuccess: () => {
-        // mutate("/api/user");
+        // invalidate the date cache
       },
       onError: (error) => {
         // console.error("error", error.message);

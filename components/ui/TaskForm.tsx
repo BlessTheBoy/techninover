@@ -287,6 +287,7 @@ export default function TaskForm() {
       validatedFields.data.time.getMinutes()
     );
     requestData.deadline = deadline.toISOString();
+    delete requestData.time;
     requestData.date = taskDate ?? new Date().toISOString().split("T")[0];
 
     const requestFormData = new FormData();

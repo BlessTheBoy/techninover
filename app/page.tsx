@@ -134,6 +134,9 @@ export default function Home() {
     completed: completedTasksData,
   });
 
+  //  update (id, index, status)
+  // updatable auto index possible?
+
   const currentDate = new Date();
 
   const day = currentDate.getDate();

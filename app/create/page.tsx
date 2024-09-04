@@ -10,43 +10,34 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import LeftArrow from "@/components/ui/svgs/left-arrow";
 import TextArea from "@/components/ui/TextArea";
 import { TimePicker } from "@/components/ui/TimePicker";
 import clsx from "clsx";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { CreateTaskClientSchema } from "../lib/zod";
 import useSWRMutation from "swr/mutation";
-import { createTask } from "../lib/actions";
 import { useToast } from "@/hooks/use-toast";
-
-async function createTaskHelper(url: string, { arg }: { arg: FormData }) {
-  const response = await createTask(arg);
-  if (response.success) {
-    return response.body;
-  } else {
-    throw new Error(response.body as string);
-  }
-}
+import { createTaskHelper } from "../lib/helpers";
 
 export default function Page() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const taskDate = searchParams.get("date");
   const { toast } = useToast();
 
-  const { trigger, ...requestValues } = useSWRMutation(
+  const { trigger, isMutating } = useSWRMutation(
     "create task",
     createTaskHelper,
     {
-      onSuccess: () => {
-        // invalidate the date cache
+      onSuccess: (data) => {
+        // invalidate the date cache and maybe do optimistic update
+        router.back();
       },
       onError: (error) => {
-        // console.error("error", error.message);
         toast({
           variant: "destructive",
           title: "Uh oh! Something went wrong.",
@@ -259,8 +250,13 @@ export default function Page() {
             />
           </div>
         </div>
-        <Button type="submit" className="w-full">
-          Add Task
+        <Button
+          type="submit"
+          className={clsx("w-full", {
+            "bg-gray_8": isMutating,
+          })}
+        >
+          {isMutating ? "Adding task..." : "Add Task"}
         </Button>
       </form>
     </main>

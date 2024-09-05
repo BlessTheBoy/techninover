@@ -18,33 +18,47 @@ import { Button } from "./button";
 import { useRouter, useSearchParams } from "next/navigation";
 import useSWRMutation from "swr/mutation";
 import { useToast } from "@/hooks/use-toast";
-import { createTaskHelper } from "@/app/lib/helpers";
 import { CreateTaskClientSchema } from "@/app/lib/zod";
+import { SortedTasks, Task } from "@/types";
 
 export default function TaskForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const taskDate = searchParams.get("date");
   const { toast } = useToast();
+  const currentDate = taskDate ?? new Date().toISOString().split("T")[0];
 
   const { trigger, isMutating } = useSWRMutation(
-    "create task",
-    createTaskHelper,
+    currentDate,
+    async (_, { arg }: { arg: FormData }) => {
+      const res = await fetch("/create/api", {
+        method: "post",
+        body: arg,
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw result;
+      }
+
+      return result as SortedTasks;
+    },
     {
-      onSuccess: (data) => {
-        // invalidate the date cache and maybe do optimistic update
+      onSuccess: () => {
         router.back();
       },
       onError: (error) => {
         toast({
           variant: "destructive",
           title: "Uh oh! Something went wrong.",
-          description: error.message,
+          description: error,
         });
       },
+      populateCache: (newSortedTasks) => newSortedTasks,
+      revalidate: true,
     }
   );
-  // console.log("requestValues", requestValues);
 
   const [taskData, setTaskData] = useState<{
     status: "todo" | "in-progress" | "completed" | undefined;
@@ -236,12 +250,7 @@ export default function TaskForm() {
           />
         </div>
       </div>
-      <Button
-        type="submit"
-        className={clsx("w-full", {
-          "bg-gray_8": isMutating,
-        })}
-      >
+      <Button type="submit" className="w-full" disabled={isMutating}>
         {isMutating ? "Adding task..." : "Add Task"}
       </Button>
     </form>
@@ -288,8 +297,9 @@ export default function TaskForm() {
     );
     requestData.deadline = deadline.toISOString();
     delete requestData.time;
-    requestData.date = taskDate ?? new Date().toISOString().split("T")[0];
+    requestData.date = currentDate;
 
+    // console.log("validated", requestData);
     const requestFormData = new FormData();
     for (const key in requestData) {
       if (requestData[key]) requestFormData.append(key, requestData[key]);

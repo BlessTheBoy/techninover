@@ -20,7 +20,7 @@ import TaskCard from "@/components/ui/TaskCard";
 import LeftArrow from "@/components/ui/svgs/left-arrow";
 import RightArrow from "@/components/ui/svgs/right-arrow";
 import Search from "@/components/ui/Search";
-import { Task } from "@/types";
+import { SortedTasks, Task } from "@/types";
 import TodoColumn from "@/components/ui/TodoColumn";
 import InProgressColumn from "@/components/ui/InProgressColumn";
 import CompletedColumn from "@/components/ui/CompletedColumn";
@@ -28,9 +28,12 @@ import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
 import MobileTaskCard from "@/components/ui/MobileTaskCard";
-import FAB from "@/components/ui/FAB";
+import useSWR from "swr";
+import { useSearchParams } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import useSWRMutation from "swr/mutation";
 
-const todoTasksData: Task[] = [
+const todoTasksData: any[] = [
   {
     priority: "high",
     id: 1,
@@ -59,7 +62,7 @@ const todoTasksData: Task[] = [
   },
 ];
 
-const inProgressTasksData: Task[] = [
+const inProgressTasksData: any[] = [
   {
     id: 7,
     priority: "low",
@@ -77,7 +80,7 @@ const inProgressTasksData: Task[] = [
   },
 ];
 
-const completedTasksData: Task[] = [
+const completedTasksData: any[] = [
   {
     id: 10,
     priority: "medium",
@@ -128,22 +131,129 @@ export default function Home() {
     })
   );
 
-  const [tasks, setTasks] = useState({
-    todo: todoTasksData,
-    "in-progress": inProgressTasksData,
-    completed: completedTasksData,
-  });
+  // const [tasks, setTasks] = useState({
+  //   todo: todoTasksData,
+  //   "in-progress": inProgressTasksData,
+  //   completed: completedTasksData,
+  // });
 
   //  update (id, index, status)
   // updatable auto index possible?
 
-  const currentDate = new Date();
+  const searchParams = useSearchParams();
+  const taskDate = searchParams.get("date");
+  const { toast } = useToast();
+  const [currentDate, setCurrentDate] = useState<Date>(
+    taskDate ? new Date(taskDate) : new Date()
+  );
 
-  const day = currentDate.getDate();
-  const month = currentDate.toLocaleString("default", { month: "long" });
   const year = currentDate.getFullYear();
-
+  const month = currentDate.toLocaleString("default", { month: "long" });
+  const day = currentDate.getDate();
   const formattedDate = `${day} ${month} ${year}`;
+
+  const currentDateString = currentDate.toISOString().split("T")[0];
+
+  const { data: tasks, isLoading } = useSWR(
+    currentDateString,
+    async (date) => {
+      const res = await fetch(`/api/${date}`, {
+        method: "get",
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw result;
+      }
+
+      return result as SortedTasks;
+    },
+    {
+      onError(error) {
+        toast({
+          variant: "destructive",
+          title: "Error fetching tasks.",
+          description: error,
+        });
+      },
+    }
+  );
+
+  const { trigger: onDragEnd } = useSWRMutation(
+    currentDateString,
+    async (_, { arg }: { arg: DragEndEvent }) => {
+      const { active, over } = arg;
+      const res = await fetch(`/api`, {
+        method: "put",
+        body: JSON.stringify({
+          activeId: active.id,
+          overId: over?.id,
+        }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw result;
+      }
+
+      return result as SortedTasks;
+    },
+    {
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Error updating task.",
+          description: error,
+        });
+      },
+      populateCache: (newSortedTasks) => newSortedTasks,
+      revalidate: false,
+      rollbackOnError: true,
+    }
+  );
+
+  const { trigger: onDragOver } = useSWRMutation(
+    currentDateString,
+    async (_, { arg }: { arg: DragOverEvent }) => {
+      const { active, over, delta } = arg;
+
+      const res = await fetch(`/api`, {
+        method: "put",
+        body: JSON.stringify({
+          activeId: active.id,
+          overId: over ? over.id : null,
+          newColumn: over?.data.current?.sortable.containerId as Task["status"],
+          delta: delta.y,
+        }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw result;
+      }
+
+      return result as SortedTasks;
+    },
+    {
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Error updating task.",
+          description: error,
+        });
+      },
+      populateCache: (newSortedTasks) => newSortedTasks,
+      revalidate: false,
+      rollbackOnError: true,
+    }
+  );
+
+  // console.log("data", tasks);
+  // console.log("isLoading", isLoading);
+  // console.log("error", error);
 
   return (
     <>
@@ -161,10 +271,28 @@ export default function Home() {
             <p className="font-sfPro font-semibold text-xl md:text-3xl grow md:flex-grow-0">
               {formattedDate}
             </p>
-            <div className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100">
+            <div
+              className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100"
+              onClick={() =>
+                setCurrentDate((d) => {
+                  const newDate = new Date(d);
+                  newDate.setDate(d.getDate() - 1);
+                  return newDate;
+                })
+              }
+            >
               <LeftArrow />
             </div>
-            <div className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100">
+            <div
+              className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100"
+              onClick={() =>
+                setCurrentDate((d) => {
+                  const newDate = new Date(d);
+                  newDate.setDate(d.getDate() + 1);
+                  return newDate;
+                })
+              }
+            >
               <RightArrow />
             </div>
           </div>
@@ -172,34 +300,38 @@ export default function Home() {
         </div>
 
         <div className="hidden md:block">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onDragOver={handleDragOver}
-          >
-            <div className="mt-8 px-[6px] py-4 grid grid-cols-3 gap-4">
-              <TodoColumn
-                todoTasks={tasks.todo.filter(Boolean)}
-                activeId={activeTask?.id}
-              />
-              <InProgressColumn
-                inProgressTasks={tasks["in-progress"].filter(Boolean)}
-                activeId={activeTask?.id}
-              />
-              <CompletedColumn
-                completedTasks={tasks.completed.filter(Boolean)}
-                activeId={activeTask?.id}
-              />
-            </div>
-            <DragOverlay>
-              {activeTask ? <TaskCard task={activeTask} /> : null}
-            </DragOverlay>
-          </DndContext>
+          {tasks && !isLoading ? (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
+            >
+              <div className="mt-8 px-[6px] py-4 grid grid-cols-3 gap-4">
+                <TodoColumn
+                  todoTasks={tasks.todo.filter(Boolean)}
+                  activeId={activeTask?.id}
+                />
+                <InProgressColumn
+                  inProgressTasks={tasks["in-progress"].filter(Boolean)}
+                  activeId={activeTask?.id}
+                />
+                <CompletedColumn
+                  completedTasks={tasks.completed.filter(Boolean)}
+                  activeId={activeTask?.id}
+                />
+              </div>
+              <DragOverlay>
+                {activeTask ? <TaskCard task={activeTask} /> : null}
+              </DragOverlay>
+            </DndContext>
+          ) : (
+            <div>loading...</div>
+          )}
         </div>
       </main>
-      <main className="block md:hidden">
+      {/* <main className="block md:hidden">
         <div className="flex border-b border-gray-400 px-2 sticky top-0 bg-white">
           <div
             className={clsx(
@@ -259,64 +391,109 @@ export default function Home() {
             <MobileTaskCard key={task.id} task={task} />
           ))}
         </div>
-      </main>
+      </main> */}
     </>
   );
 
   function handleDragStart(event: DragStartEvent) {
     const { active } = event;
     // console.log("active", active);
-    const status = active.data.current?.sortable
-      .containerId as keyof typeof tasks;
+    const status: Task["status"] = active.data.current?.sortable.containerId;
 
-    setActiveTask(tasks[status].find((i) => i.id === active.id));
+    setActiveTask(tasks?.[status].find((i) => i.id === active.id));
   }
 
-  function handleDragEnd(event: DragEndEvent) {
+  // function handleDragEnd(event: DragEndEvent) {
+  //   const { active, over } = event;
+  //   // console.log("active.id, over.id", active, over);
+
+  //   if (over && active.id !== over?.id) {
+  //     setTasks((items) => {
+  //       const oldStatus = active.data.current?.sortable
+  //         .containerId as keyof typeof items;
+  //       const newStatus = over?.data.current?.sortable
+  //         .containerId as keyof typeof items;
+  //       const oldIndex = items[oldStatus].findIndex((i) => i.id === active.id);
+  //       const newIndex = items[newStatus].findIndex((i) => i.id === over?.id);
+
+  //       if (oldStatus === newStatus) {
+  //         return {
+  //           ...items,
+  //           [oldStatus]: arrayMove(items[oldStatus], oldIndex, newIndex),
+  //         };
+  //       } else {
+  //         return {
+  //           ...items,
+  //           [oldStatus]: items[oldStatus].filter((i) => i.id !== active.id),
+  //           [newStatus]: [
+  //             ...items[newStatus].slice(0, newIndex),
+  //             { ...items[oldStatus][oldIndex], status: newStatus },
+  //             ...items[newStatus].slice(newIndex),
+  //           ],
+  //         };
+  //       }
+  //     });
+  //   }
+
+  //   setActiveTask(undefined);
+  // }
+
+  async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
+    let newData: SortedTasks = {
+      todo: [],
+      "in-progress": [],
+      completed: [],
+    };
     // console.log("active.id, over.id", active, over);
 
-    if (over && active.id !== over?.id) {
-      setTasks((items) => {
-        const oldStatus = active.data.current?.sortable
-          .containerId as keyof typeof items;
-        const newStatus = over?.data.current?.sortable
-          .containerId as keyof typeof items;
-        const oldIndex = items[oldStatus].findIndex((i) => i.id === active.id);
-        const newIndex = items[newStatus].findIndex((i) => i.id === over?.id);
+    if (tasks && over && active.id !== over?.id) {
+      const oldStatus = active.data.current?.sortable
+        .containerId as Task["status"];
+      const newStatus = over?.data.current?.sortable
+        .containerId as Task["status"];
+      const oldIndex = tasks[oldStatus].findIndex((i) => i.id === active.id);
+      const newIndex = tasks[newStatus].findIndex((i) => i.id === over?.id);
 
-        if (oldStatus === newStatus) {
-          return {
-            ...items,
-            [oldStatus]: arrayMove(items[oldStatus], oldIndex, newIndex),
-          };
-        } else {
-          return {
-            ...items,
-            [oldStatus]: items[oldStatus].filter((i) => i.id !== active.id),
-            [newStatus]: [
-              ...items[newStatus].slice(0, newIndex),
-              { ...items[oldStatus][oldIndex], status: newStatus },
-              ...items[newStatus].slice(newIndex),
-            ],
-          };
-        }
+      if (oldStatus === newStatus) {
+        newData = {
+          ...tasks,
+          [oldStatus]: arrayMove(tasks[oldStatus], oldIndex, newIndex),
+        };
+      } else {
+        newData = {
+          ...tasks,
+          [oldStatus]: tasks[oldStatus].filter((i) => i.id !== active.id),
+          [newStatus]: [
+            ...tasks[newStatus].slice(0, newIndex),
+            { ...tasks[oldStatus][oldIndex], status: newStatus },
+            ...tasks[newStatus].slice(newIndex),
+          ],
+        };
+      }
+      onDragEnd(event, {
+        optimisticData: newData,
       });
+      setActiveTask(undefined);
     }
-
-    setActiveTask(undefined);
   }
 
-  function handleDragOver(event: DragOverEvent) {
+  async function handleDragOver(event: DragOverEvent) {
     const { active, over, delta } = event;
     const activeId = active.id;
     const overId = over ? over.id : null;
     const activeColumn = active.data.current?.sortable
-      .containerId as keyof typeof tasks;
+      .containerId as Task["status"];
     const overColumn = over?.data.current?.sortable
-      .containerId as keyof typeof tasks;
+      .containerId as Task["status"];
 
-    if (!activeColumn || !overColumn || activeColumn === overColumn) {
+    let newData: SortedTasks = {
+      todo: [],
+      "in-progress": [],
+      completed: [],
+    };
+
+    if (!activeColumn || !overColumn || activeColumn === overColumn || !tasks) {
       return null;
     }
     const activeItems = tasks[activeColumn];
@@ -330,14 +507,19 @@ export default function Home() {
       return overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
     };
 
-    setTasks((items) => ({
-      ...items,
+    newData = {
+      ...tasks,
       [activeColumn]: activeItems.filter((i) => i.id !== activeId),
       [overColumn]: [
         ...overItems.slice(0, newIndex()),
         { ...activeItems[activeIndex], status: overColumn },
         ...overItems.slice(newIndex(), overItems.length),
       ],
-    }));
+    };
+
+    onDragOver(event, {
+      optimisticData: newData,
+    });
+    setActiveTask(undefined);
   }
 }

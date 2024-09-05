@@ -20,8 +20,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { CreateTaskClientSchema } from "../lib/zod";
 import useSWRMutation from "swr/mutation";
+import { SortedTasks, Task } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { createTaskHelper } from "../lib/helpers";
 
 export default function Page() {
   const searchParams = useSearchParams();
@@ -29,24 +29,39 @@ export default function Page() {
   const taskDate = searchParams.get("date");
   const { toast } = useToast();
 
+  const currentDate = taskDate ?? new Date().toISOString().split("T")[0];
+
   const { trigger, isMutating } = useSWRMutation(
-    "create task",
-    createTaskHelper,
+    currentDate,
+    async (_, { arg }: { arg: FormData }) => {
+      const res = await fetch("/create/api", {
+        method: "post",
+        body: arg,
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw result;
+      }
+
+      return result as SortedTasks;
+    },
     {
-      onSuccess: (data) => {
-        // invalidate the date cache and maybe do optimistic update
+      onSuccess: () => {
         router.back();
       },
       onError: (error) => {
         toast({
           variant: "destructive",
           title: "Uh oh! Something went wrong.",
-          description: error.message,
+          description: error,
         });
       },
+      populateCache: (newSortedTasks) => newSortedTasks,
+      revalidate: true,
     }
   );
-  // console.log("requestValues", requestValues);
 
   const [taskData, setTaskData] = useState<{
     status: "todo" | "in-progress" | "completed" | undefined;
@@ -250,12 +265,7 @@ export default function Page() {
             />
           </div>
         </div>
-        <Button
-          type="submit"
-          className={clsx("w-full", {
-            "bg-gray_8": isMutating,
-          })}
-        >
+        <Button type="submit" className="w-full" disabled={isMutating}>
           {isMutating ? "Adding task..." : "Add Task"}
         </Button>
       </form>
@@ -302,7 +312,8 @@ export default function Page() {
       validatedFields.data.time.getMinutes()
     );
     requestData.deadline = deadline.toISOString();
-    requestData.date = taskDate ?? new Date().toISOString().split("T")[0];
+    delete requestData.time;
+    requestData.date = currentDate;
 
     // console.log("validated", requestData);
     const requestFormData = new FormData();

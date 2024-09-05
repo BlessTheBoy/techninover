@@ -21,8 +21,75 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import React, { useState } from "react";
 
-const allTasks: Task[] = [
-  {
+// const allTasks: Task[] = [
+//   {
+//     priority: "high",
+//     id: 1,
+//     title: "Create a new design",
+//     status: "todo",
+//     cover: "/overflowing-bookcases.jpg",
+//     description:
+//       "Write a blog post outlining the top 10 productivity tips for busy professionals. The post should be engaging, informative, and include actionable advice. Target word count: 1,200 words.",
+//     deadline: "2024-08-31T13:34:43.051Z",
+//   },
+//   {
+//     id: 2,
+//     priority: "medium",
+//     title: "Home Renovation",
+//     description:
+//       "Write a blog post outlining the top 10 productivity tips for busy professionals.",
+//     status: "todo",
+//     deadline: "2024-08-28T13:34:43.051Z",
+//   },
+//   {
+//     id: 3,
+//     priority: "high",
+//     title: "Organize a charity event",
+//     status: "todo",
+//     deadline: "2024-08-28T13:34:43.051Z",
+//   },
+//   {
+//     id: 7,
+//     priority: "low",
+//     title: "Watch a Frontend Tutorial",
+//     status: "in-progress",
+//     deadline: "2024-08-28T13:34:43.051Z",
+//   },
+//   {
+//     id: 8,
+//     priority: "medium",
+//     title: "Prep my week meal",
+//     cover: "/meal-prep.avif",
+//     status: "in-progress",
+//     deadline: "2024-08-28T13:34:43.051Z",
+//   },
+//   {
+//     id: 10,
+//     priority: "medium",
+//     title: "Read a book",
+//     cover: "/books.avif",
+//     status: "completed",
+//     deadline: "2024-08-28T13:34:43.051Z",
+//   },
+//   {
+//     id: 11,
+//     priority: "low",
+//     title: "Improve cards readability",
+//     description: "As a team license owner, I want to use multiplied limits",
+//     status: "completed",
+//     deadline: "2024-08-28T13:34:43.051Z",
+//   },
+//   {
+//     id: 12,
+//     priority: "high",
+//     title: "Attend Standup and give updates",
+//     status: "completed",
+//     deadline: "2024-08-28T13:34:43.051Z",
+//   },
+// ];
+
+export default function Page({ params }: { params: { id: string } }) {
+  const task: Task = {
     priority: "high",
     id: 1,
     title: "Create a new design",
@@ -30,74 +97,26 @@ const allTasks: Task[] = [
     cover: "/overflowing-bookcases.jpg",
     description:
       "Write a blog post outlining the top 10 productivity tips for busy professionals. The post should be engaging, informative, and include actionable advice. Target word count: 1,200 words.",
-    deadline: "2024-08-31T13:34:43.051Z",
-  },
-  {
-    id: 2,
-    priority: "medium",
-    title: "Home Renovation",
-    description:
-      "Write a blog post outlining the top 10 productivity tips for busy professionals.",
-    status: "todo",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 3,
-    priority: "high",
-    title: "Organize a charity event",
-    status: "todo",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 7,
-    priority: "low",
-    title: "Watch a Frontend Tutorial",
-    status: "in-progress",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 8,
-    priority: "medium",
-    title: "Prep my week meal",
-    cover: "/meal-prep.avif",
-    status: "in-progress",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 10,
-    priority: "medium",
-    title: "Read a book",
-    cover: "/books.avif",
-    status: "completed",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 11,
-    priority: "low",
-    title: "Improve cards readability",
-    description: "As a team license owner, I want to use multiplied limits",
-    status: "completed",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 12,
-    priority: "high",
-    title: "Attend Standup and give updates",
-    status: "completed",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-];
-
-export default function Page({ params }: { params: { id: string } }) {
-  const task = allTasks.find((task) => task.id === Number(params.id));
+    deadline: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    date: "2024-09-05",
+    tracker: 20,
+    deletedAt: null
+  };
+  // const task = allTasks.find((task) => task.id === Number(params.id));
   if (!task) {
     notFound();
   }
   const [status, setStatus] = useState<"todo" | "in-progress" | "completed">(
     task.status
   );
-  const [priority, setPriority] = useState<string | undefined>(task.priority);
-  const [image, setImage] = useState<string | undefined>(task.cover);
+  const [priority, setPriority] = useState<Task["priority"] | undefined>(
+    task.priority ?? undefined
+  );
+  const [image, setImage] = useState<string | undefined>(
+    task.cover ?? undefined
+  );
   const [time, setTime] = useState<Date | undefined>(new Date(task.deadline));
   const [date, setDate] = useState<Date | undefined>(new Date(task.deadline));
 
@@ -125,7 +144,7 @@ export default function Page({ params }: { params: { id: string } }) {
             label="Description"
             placeholder="Enter task description"
             optional
-            defaultValue={task?.description}
+            defaultValue={task?.description ?? undefined}
           />
           <div className="grid items-center gap-1.5">
             <label className="font-inter font-medium text-sm text-text_header">
@@ -133,7 +152,7 @@ export default function Page({ params }: { params: { id: string } }) {
             </label>
             <Select
               onValueChange={(v) =>
-                setStatus(v as "todo" | "in-progress" | "completed")
+                setStatus(v as Task['status'])
               }
               defaultValue={status}
             >
@@ -168,7 +187,10 @@ export default function Page({ params }: { params: { id: string } }) {
             <label className="font-inter font-medium text-sm text-text_header">
               Priority
             </label>
-            <Select onValueChange={setPriority} defaultValue={priority}>
+            <Select
+              onValueChange={(v) => setPriority(v as Task["priority"])}
+              defaultValue={priority ?? undefined}
+            >
               <SelectTrigger className="h-12 rounded-xl border border-gray_8 placeholder:text-[#848585] w-full px-[14px] outline-purple">
                 {priority ? (
                   <div

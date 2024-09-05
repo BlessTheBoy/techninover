@@ -31,6 +31,4 @@ export const CreateTaskClientSchema = TaskSchema.omit({
   }),
 });
 
-export const CreateTaskServerSchema = TaskSchema.extend({
-  cover: z.unknown().optional(),
-});
+export const CreateTaskServerSchema = TaskSchema

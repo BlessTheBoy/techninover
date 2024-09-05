@@ -1,6 +1,6 @@
 "use client";
 
-import { Task } from "@/types";
+import { SortedTasks, Task } from "@/types";
 import clsx from "clsx";
 import React from "react";
 import MoreHorizontal from "./svgs/more-horizontal";
@@ -11,6 +11,9 @@ import moment from "moment";
 import { DraggableAttributes } from "@dnd-kit/core";
 import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import Link from "next/link";
+import useSWRMutation from "swr/mutation";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "./button";
 
 export default function TaskCard({
   task,
@@ -22,7 +25,52 @@ export default function TaskCard({
   listeners?: SyntheticListenerMap;
 }) {
   const deadline = new Date(task.deadline);
+  const { toast } = useToast();
+
   const currentDate = new Date();
+  const { trigger, isMutating } = useSWRMutation(
+    task.date,
+    async () => {
+      const res = await fetch(`/task/${task.id}`, {
+        method: "delete",
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw result;
+      }
+
+      return result;
+    },
+    {
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: error,
+        });
+      },
+      optimisticData: (oldSortedTasks?: SortedTasks) => {
+        if (!oldSortedTasks) {
+          return {
+            todo: [],
+            "in-progress": [],
+            completed: [],
+          } as SortedTasks;
+        }
+        const newSortedTasks: SortedTasks = {
+          ...oldSortedTasks,
+          [task.status]: oldSortedTasks[task.status].filter(
+            (t: Task) => t.id !== task.id
+          ),
+        };
+        return newSortedTasks;
+      },
+      rollbackOnError: true,
+      revalidate: true,
+    }
+  );
 
   return (
     <div
@@ -63,15 +111,23 @@ export default function TaskCard({
             <PopoverTrigger className="w-6 h-6 flex justify-center items-center border border-gray_6 hover:bg-gray-100 shadow-card rounded-md">
               <MoreHorizontal />
             </PopoverTrigger>
-            <PopoverContent className="w-fit p-0 border border-gray_8">
+            <PopoverContent className="w-fit p-0 border border-gray_8 overflow-hidden">
               <Link
                 href={`task/${task.id}/edit`}
                 className="block w-full px-3 py-1 text-sm text-text_paragraph text-left hover:bg-gray-100"
               >
                 Edit
               </Link>
-              <button className="w-full px-3 py-1 text-sm text-danger text-left hover:bg-gray-100">
-                Delete
+              <button
+                className={clsx(
+                  "w-full px-3 py-1 text-sm text-danger text-left bg-white hover:bg-gray-100",
+                  {
+                    "cursor-not-allowed opacity-50 bg-gray-100": isMutating,
+                  }
+                )}
+                onClick={() => trigger()}
+              >
+                {isMutating ? "Deleting..." : "Delete"}
               </button>
             </PopoverContent>
           </Popover>

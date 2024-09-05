@@ -57,12 +57,15 @@ export default function Page({ params }: { params: { id: string } }) {
         });
       },
       onSuccess: (data) => {
-        setTaskData({
-          status: data.status,
-          priority: data.priority ?? undefined,
-          time: new Date(data.deadline),
-          date: new Date(data.deadline),
-          cover: data.cover ?? undefined,
+        setTaskData((t) => {
+          if (t.status) return t;
+          return {
+            status: data.status,
+            priority: data.priority ?? undefined,
+            time: new Date(data.deadline),
+            date: new Date(data.deadline),
+            cover: data.cover ?? undefined,
+          };
         });
       },
     }

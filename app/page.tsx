@@ -449,13 +449,14 @@ export default function Home() {
   // }
 
   async function handleDragEnd(event: DragEndEvent) {
+    console.log("handle drag end");
     const { active, over } = event;
     let newData: SortedTasks = {
       todo: [],
       "in-progress": [],
       completed: [],
     };
-    // console.log("active.id, over.id", active, over);
+    console.log("active.id, over.id", active, over);
 
     if (tasks && over && active.id !== over?.id) {
       const oldStatus = active.data.current?.sortable
@@ -481,9 +482,9 @@ export default function Home() {
           ],
         };
       }
-      onDragEnd(event, {
-        optimisticData: newData,
-      });
+      // onDragEnd(event, {
+      //   optimisticData: newData,
+      // });
       setActiveTask(undefined);
     }
   }
@@ -497,15 +498,15 @@ export default function Home() {
     const overColumn = over?.data.current?.sortable
       .containerId as Task["status"];
 
+    if (!activeColumn || !overColumn || activeColumn === overColumn || !tasks) {
+      return null;
+    }
+    console.log("handle drag over");
     let newData: SortedTasks = {
       todo: [],
       "in-progress": [],
       completed: [],
     };
-
-    if (!activeColumn || !overColumn || activeColumn === overColumn || !tasks) {
-      return null;
-    }
     const activeItems = tasks[activeColumn];
     const overItems = tasks[overColumn];
     const activeIndex = activeItems.findIndex((i) => i.id === activeId);
@@ -527,9 +528,9 @@ export default function Home() {
       ],
     };
 
-    onDragOver(event, {
-      optimisticData: newData,
-    });
+    // onDragOver(event, {
+    //   optimisticData: newData,
+    // });
     setActiveTask(undefined);
   }
 }

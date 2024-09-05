@@ -55,16 +55,21 @@ export default function TaskEditForm({ id }: { id: number }) {
         });
       },
       onSuccess: (data) => {
-        setTaskData({
-          status: data.status,
-          priority: data.priority ?? undefined,
-          time: new Date(data.deadline),
-          date: new Date(data.deadline),
-          cover: data.cover ?? undefined,
+        setTaskData((t) =>{
+          if(t.status) return t;
+          return {
+            status: data.status,
+            priority: data.priority ?? undefined,
+            time: new Date(data.deadline),
+            date: new Date(data.deadline),
+            cover: data.cover ?? undefined,
+          };
         });
       },
     }
   );
+
+  console.log("task", task)
 
   const { trigger, isMutating } = useSWRMutation(
     `${task?.date}`,

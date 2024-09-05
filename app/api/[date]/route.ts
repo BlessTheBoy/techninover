@@ -30,7 +30,13 @@ export async function GET(
   tasks
     .sort((a, b) => {
       if (a.tracker && b.tracker) {
-        return a.tracker > b.tracker ? -1 : 1;
+        return a.tracker == b.tracker
+          ? a.updatedAt > b.updatedAt
+            ? -1
+            : 1
+          : a.tracker > b.tracker
+          ? -1
+          : 1;
       }
       return 0;
     })

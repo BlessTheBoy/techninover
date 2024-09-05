@@ -4,8 +4,8 @@ import { SortedTasks, Task } from "@/types";
 
 const prisma = new PrismaClient();
 
-export async function PUT(request: NextRequest) {         
-const {
+export async function PUT(request: NextRequest) {
+  const {
     activeId,
     overId,
     newColumn,
@@ -28,8 +28,11 @@ const {
     },
   });
 
-  if (newColumn){
+  if (newColumn) {
     // cross column
+    console.log("active task initial tracker", activeTask?.tracker);
+    console.log("over task initial tracker", overTask?.tracker);
+    // console.log("overId", overId)
     const overItems = await prisma.task.findMany({
       where: {
         status: newColumn,
@@ -39,16 +42,24 @@ const {
       },
     });
 
-    const overIndex = overItems.findIndex((item) => item.id === overId);
-    const overTracker = overItems[overIndex].tracker;
-    const lowestTracker = overItems[0].tracker;
+    let newTracker = activeTask?.tracker;
 
-    const newTracker = (() => {
-      const putOnBelowLastItem =
-        overIndex === overItems.length - 1 && delta! > 0;
-      const modifier = putOnBelowLastItem ? -1 : 1;
-      return overIndex >= 0 ? overTracker + modifier : lowestTracker - 1;
-    })();
+    const overIndex = overItems.findIndex((item) => item.id === overId);
+
+    if (overItems.length == 0) newTracker = activeTask!.tracker;
+    else if (overIndex === -1) {
+      const lowestTracker = overItems[0].tracker;
+      newTracker = lowestTracker - 1;
+    } else {
+      const overTracker = overItems[overIndex].tracker;
+
+      newTracker = (() => {
+        const putOnBelowLastItem =
+          overIndex === overItems.length - 1 && delta! > 0;
+        const modifier = putOnBelowLastItem ? 1 : -1;
+        return overTracker + modifier;
+      })();
+    }
 
     try {
       await prisma.task.update({
@@ -68,14 +79,14 @@ const {
     if (!activeTask || !overTask) {
       return Response.json("Tasks not found", { status: 404 });
     }
-  
+
     if (activeTask.status == overTask.status) {
       // Swap trackers
       let temp = activeTask.tracker;
-      if(activeTask.tracker == overTask.tracker){
+      if (activeTask.tracker == overTask.tracker) {
         temp = activeTask.tracker - 1;
       }
-  
+
       try {
         await prisma.task.update({
           where: {
@@ -96,7 +107,7 @@ const {
       } catch (error) {
         return Response.json("Failed to update tasks", { status: 500 });
       }
-    } else{
+    } else {
       try {
         await prisma.task.update({
           where: {
@@ -113,18 +124,17 @@ const {
     }
   }
 
-
-
-
   // conclusion
   const date = activeTask!.date;
   let tasks: Task[] = [];
   try {
-    tasks = await prisma.task.findMany({
-      where: {
-        date: date,
-      },
-    }).then((tasks) => tasks as Task[]);
+    tasks = await prisma.task
+      .findMany({
+        where: {
+          date: date,
+        },
+      })
+      .then((tasks) => tasks as Task[]);
   } catch (error) {
     return Response.json(`Failed to fetch tasks for ${date}`, { status: 500 });
   }
@@ -137,7 +147,13 @@ const {
   tasks
     .sort((a, b) => {
       if (a.tracker && b.tracker) {
-        return a.tracker > b.tracker ? -1 : 1;
+        return a.tracker == b.tracker
+          ? a.updatedAt > b.updatedAt
+            ? -1
+            : 1
+          : a.tracker > b.tracker
+          ? -1
+          : 1;
       }
       return 0;
     })

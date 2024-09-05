@@ -13,7 +13,7 @@ import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import Link from "next/link";
 import useSWRMutation from "swr/mutation";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "./button";
+import { preload } from "swr";
 
 export default function TaskCard({
   task,
@@ -24,6 +24,21 @@ export default function TaskCard({
   attributes?: DraggableAttributes;
   listeners?: SyntheticListenerMap;
 }) {
+
+  preload(`${task.id}`, async () => {
+    const res = await fetch(`/task/${task.id}`, {
+      method: "get",
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw result;
+    }
+
+    return result as Task;
+  });
+
   const deadline = new Date(task.deadline);
   const { toast } = useToast();
 

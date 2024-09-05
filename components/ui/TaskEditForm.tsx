@@ -16,132 +16,149 @@ import ImageUploader from "./ImageUploader";
 import { DatePicker } from "./DatePicker";
 import { TimePicker } from "./TimePicker";
 import { Button } from "./button";
-import { notFound } from "next/navigation";
-import { Task } from "@/types";
-
-// const allTasks: Task[] = [
-//   {
-//     priority: "high",
-//     id: 1,
-//     title: "Create a new design",
-//     status: "todo",
-//     cover: "/overflowing-bookcases.jpg",
-//     description:
-//       "Write a blog post outlining the top 10 productivity tips for busy professionals. The post should be engaging, informative, and include actionable advice. Target word count: 1,200 words.",
-//     deadline: "2024-08-31T13:34:43.051Z",
-//   },
-//   {
-//     id: 2,
-//     priority: "medium",
-//     title: "Home Renovation",
-//     description:
-//       "Write a blog post outlining the top 10 productivity tips for busy professionals.",
-//     status: "todo",
-//     deadline: "2024-08-28T13:34:43.051Z",
-//   },
-//   {
-//     id: 3,
-//     priority: "high",
-//     title: "Organize a charity event",
-//     status: "todo",
-//     deadline: "2024-08-28T13:34:43.051Z",
-//   },
-//   {
-//     id: 7,
-//     priority: "low",
-//     title: "Watch a Frontend Tutorial",
-//     status: "in-progress",
-//     deadline: "2024-08-28T13:34:43.051Z",
-//   },
-//   {
-//     id: 8,
-//     priority: "medium",
-//     title: "Prep my week meal",
-//     cover: "/meal-prep.avif",
-//     status: "in-progress",
-//     deadline: "2024-08-28T13:34:43.051Z",
-//   },
-//   {
-//     id: 10,
-//     priority: "medium",
-//     title: "Read a book",
-//     cover: "/books.avif",
-//     status: "completed",
-//     deadline: "2024-08-28T13:34:43.051Z",
-//   },
-//   {
-//     id: 11,
-//     priority: "low",
-//     title: "Improve cards readability",
-//     description: "As a team license owner, I want to use multiplied limits",
-//     status: "completed",
-//     deadline: "2024-08-28T13:34:43.051Z",
-//   },
-//   {
-//     id: 12,
-//     priority: "high",
-//     title: "Attend Standup and give updates",
-//     status: "completed",
-//     deadline: "2024-08-28T13:34:43.051Z",
-//   },
-// ];
+import { notFound, useRouter } from "next/navigation";
+import { SortedTasks, Task } from "@/types";
+import useSWR from "swr";
+import { useToast } from "@/hooks/use-toast";
+import useSWRMutation from "swr/mutation";
+import { CreateTaskClientSchema } from "@/app/lib/zod";
 
 export default function TaskEditForm({ id }: { id: number }) {
-  const task: Task = {
-    priority: "high",
-    id: 1,
-    title: "Create a new design",
-    status: "todo",
-    cover: "/overflowing-bookcases.jpg",
-    description:
-      "Write a blog post outlining the top 10 productivity tips for busy professionals. The post should be engaging, informative, and include actionable advice. Target word count: 1,200 words.",
-    deadline: new Date(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    date: "2024-09-05",
-    tracker: 20,
-    deletedAt: null,
-  };
-  // const task = allTasks.find((task) => task.id === Number(id));
-  if (!task) {
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const {
+    data: task,
+    error,
+    isLoading,
+  } = useSWR(
+    `${id}`,
+    async () => {
+      const res = await fetch(`/task/${id}`, {
+        method: "get",
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw result;
+      }
+
+      return result as Task;
+    },
+    {
+      onError(error) {
+        toast({
+          variant: "destructive",
+          title: "Error fetching task.",
+          description: error,
+        });
+      },
+      onSuccess: (data) => {
+        setTaskData({
+          status: data.status,
+          priority: data.priority ?? undefined,
+          time: new Date(data.deadline),
+          date: new Date(data.deadline),
+          cover: data.cover ?? undefined,
+        });
+      },
+    }
+  );
+
+  const { trigger, isMutating } = useSWRMutation(
+    `${task?.date}`,
+    async (_, { arg }: { arg: FormData }) => {
+      const res = await fetch(`/task/${task?.id}`, {
+        method: "put",
+        body: arg,
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw result;
+      }
+
+      return result as SortedTasks;
+    },
+    {
+      onSuccess: () => {
+        router.back();
+        // router.push(`/?date=${task?.date}`);
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: error,
+        });
+      },
+      populateCache: (newSortedTasks) => newSortedTasks,
+      revalidate: true,
+    }
+  );
+
+  const [taskData, setTaskData] = useState<{
+    status: "todo" | "in-progress" | "completed" | undefined;
+    priority: "low" | "medium" | "high" | undefined;
+    time: Date | undefined;
+    date: Date | undefined;
+    cover: string | undefined;
+  }>({
+    status: task?.status ?? undefined,
+    priority: task?.priority ?? undefined,
+    time: task ? new Date(task.deadline) : undefined,
+    date: task ? new Date(task.deadline) : undefined,
+    cover: task?.cover ?? undefined,
+  });
+
+  const [fieldError, setFieldError] = useState({
+    title: "",
+    description: "",
+    status: "",
+    priority: "",
+    date: "",
+    time: "",
+  });
+
+  if (error?.status === 404 || error?.includes("not found")) {
     notFound();
   }
-  const [status, setStatus] = useState<"todo" | "in-progress" | "completed">(
-    task.status
-  );
-  const [priority, setPriority] = useState<Task["priority"] | undefined>(
-    task.priority ?? undefined
-  );
-  const [image, setImage] = useState<string | undefined>(
-    task.cover ?? undefined
-  );
-  const [time, setTime] = useState<Date | undefined>(new Date(task.deadline));
-  const [date, setDate] = useState<Date | undefined>(new Date(task.deadline));
 
-  // console.log("priority", priority);
-  // console.log("task", task);
+  if (!task) return null;
+
   return (
-    <form className="pb-10">
+    <form className="pb-10" action={handleSubmit}>
       <div className="space-y-5 mb-12">
         <Input
           label="Task Name"
           placeholder="Enter task name"
-          defaultValue={task.title}
+          defaultValue={task?.title}
+          name="title"
+          error={fieldError.title}
         />
         <TextArea
           label="Description"
           placeholder="Enter task description"
+          name="description"
           optional
-          defaultValue={task.description ?? undefined}
+          error={fieldError.description}
+          defaultValue={task?.description ?? undefined}
         />
-
         <div className="grid items-center gap-1.5">
           <label className="font-inter font-medium text-sm text-text_header">
             Status
           </label>
           <Select
-            onValueChange={(v) => setStatus(v as Task["status"])}
-            defaultValue={status}
+            onValueChange={(v) =>
+              setTaskData({
+                ...taskData,
+                status: v as "todo" | "in-progress" | "completed",
+              })
+            }
+            defaultValue={taskData.status}
+            name="status"
           >
             <SelectTrigger className="h-12 rounded-xl border border-gray_8 placeholder:text-[#848585] w-full px-[14px] outline-purple">
               <SelectValue placeholder="Select task status" />
@@ -169,35 +186,44 @@ export default function TaskEditForm({ id }: { id: number }) {
               </SelectGroup>
             </SelectContent>
           </Select>
+          {fieldError.status ? (
+            <p className="text-error text-xs">{fieldError.status}</p>
+          ) : null}
         </div>
         <div className="grid items-center gap-1.5">
           <label className="font-inter font-medium text-sm text-text_header">
             Priority
           </label>
           <Select
-            onValueChange={(v) => setPriority(v as Task["priority"])}
-            defaultValue={priority ?? undefined}
+            onValueChange={(v) =>
+              setTaskData({
+                ...taskData,
+                priority: v as "low" | "medium" | "high",
+              })
+            }
+            defaultValue={taskData.priority}
+            name="priority"
           >
             <SelectTrigger className="h-12 rounded-xl border border-gray_8 placeholder:text-[#848585] w-full px-[14px] outline-purple">
-              {priority ? (
+              {taskData.priority ? (
                 <div
                   className={clsx(
                     "h-6 px-2 rounded-[0.25rem] flex justify-center items-center w-fit text-[#848585]",
                     {
                       "bg-success_bg text-success font-inter font-medium text-xs":
-                        priority == "high",
+                        taskData.priority == "high",
                     },
                     {
                       "bg-medium_bg text-medium font-inter font-medium text-xs":
-                        priority == "medium",
+                        taskData.priority == "medium",
                     },
                     {
                       "bg-error_bg text-error font-inter font-medium text-xs":
-                        priority == "low",
+                        taskData.priority == "low",
                     }
                   )}
                 >
-                  {priority.toUpperCase()}
+                  {taskData.priority.toUpperCase()}
                 </div>
               ) : (
                 <span className="text-[#848585]">Select task priority</span>
@@ -226,19 +252,87 @@ export default function TaskEditForm({ id }: { id: number }) {
               </SelectGroup>
             </SelectContent>
           </Select>
+          {fieldError.priority ? (
+            <p className="text-error text-xs">{fieldError.priority}</p>
+          ) : null}
         </div>
         <ImageUploader
-          image={image}
-          setImage={setImage}
+          image={taskData.cover}
+          setImage={(v) => setTaskData({ ...taskData, cover: v })}
           label="Upload cover"
           optional
         />
         <div className="flex gap-4">
-          <DatePicker label="Deadline" date={date} setDate={setDate} />
-          <TimePicker label="Time" time={time} setTime={setTime} />
+          <DatePicker
+            label="Deadline"
+            date={taskData.date}
+            setDate={(v) => setTaskData({ ...taskData, date: v })}
+            error={fieldError.date}
+          />
+          <TimePicker
+            label="Time"
+            time={taskData.time}
+            setTime={(v) => setTaskData({ ...taskData, time: v })}
+            error={fieldError.time}
+          />
         </div>
       </div>
-      <Button className="w-full">Save Edit</Button>
+      <Button type="submit" className="w-full" disabled={isMutating}>
+        {isMutating ? "Saving Task..." : "Save Task"}
+      </Button>
     </form>
   );
+
+  function handleSubmit(formData: FormData) {
+    const data: any = Object.fromEntries(formData.entries());
+    data.time = taskData.time;
+    data.date = taskData.date;
+    data.priority = taskData.priority;
+    data.status = taskData.status;
+
+    const validatedFields =
+      CreateTaskClientSchema.passthrough().safeParse(data);
+
+    if (!validatedFields.success) {
+      const validationErrors = validatedFields.error.flatten().fieldErrors;
+      setFieldError({
+        title: validationErrors.title?.[0] ?? "",
+        description: validationErrors.description?.[0] ?? "",
+        status: validationErrors.status?.[0] ?? "",
+        priority: validationErrors.priority?.[0] ?? "",
+        date: validationErrors.date?.[0] ?? "",
+        time: validationErrors.time?.[0] ?? "",
+      });
+      return;
+    }
+    setFieldError({
+      title: "",
+      description: "",
+      status: "",
+      priority: "",
+      date: "",
+      time: "",
+    });
+
+    const requestData: any = { ...validatedFields.data };
+    const deadline = new Date(validatedFields.data.date);
+    deadline.setHours(
+      validatedFields.data.time.getHours(),
+      validatedFields.data.time.getMinutes()
+    );
+    requestData.deadline = deadline.toISOString();
+    delete requestData.time;
+    requestData.date = task!.date;
+    if (!taskData.cover && (data.cover as File)?.size === 0)
+      delete requestData.cover;
+    if (taskData.cover && (data.cover as File)?.size === 0)
+      requestData.cover = taskData.cover;
+
+    // console.log("validated", requestData);
+    const requestFormData = new FormData();
+    for (const key in requestData) {
+      if (requestData[key]) requestFormData.append(key, requestData[key]);
+    }
+    trigger(requestFormData);
+  }
 }

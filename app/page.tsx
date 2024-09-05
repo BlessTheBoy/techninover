@@ -28,7 +28,7 @@ import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
 import MobileTaskCard from "@/components/ui/MobileTaskCard";
-import useSWR from "swr";
+import useSWR, { Arguments, mutate } from "swr";
 import { useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import useSWRMutation from "swr/mutation";
@@ -177,6 +177,16 @@ export default function Home() {
           description: error,
         });
       },
+      onSuccess(data) {
+        const allTasks = [
+          ...data.todo,
+          ...data["in-progress"],
+          ...data.completed,
+        ];
+        allTasks.forEach((task) => {
+          mutate(`${task.id}`, task, false);
+        });
+      },
     }
   );
 
@@ -300,7 +310,7 @@ export default function Home() {
         </div>
 
         <div className="hidden md:block">
-          {tasks && !isLoading ? (
+          {tasks ? (
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}

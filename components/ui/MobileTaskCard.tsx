@@ -1,6 +1,6 @@
 "use client";
 
-import { Task } from "@/types";
+import { SortedTasks, Task } from "@/types";
 import clsx from "clsx";
 import React from "react";
 import MoreHorizontal from "./svgs/more-horizontal";
@@ -8,11 +8,73 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import Image from "next/image";
 import Flag from "./svgs/flag";
 import moment from "moment";
+import { useToast } from "@/hooks/use-toast";
+import useSWRMutation from "swr/mutation";
+import { preload } from "swr";
 
 export default function MobileTaskCard({ task }: { task: Task }) {
-  const deadline = new Date(task.deadline);
-  const currentDate = new Date();
 
+  preload(`${task.id}`, async () => {
+    const res = await fetch(`/task/${task.id}`, {
+      method: "get",
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw result;
+    }
+
+    return result as Task;
+  });
+
+  const deadline = new Date(task.deadline);
+  const { toast } = useToast();
+
+  const currentDate = new Date();
+  const { trigger, isMutating } = useSWRMutation(
+    task.date,
+    async () => {
+      const res = await fetch(`/task/${task.id}`, {
+        method: "delete",
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw result;
+      }
+
+      return result;
+    },
+    {
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: error,
+        });
+      },
+      optimisticData: (oldSortedTasks?: SortedTasks) => {
+        if (!oldSortedTasks) {
+          return {
+            todo: [],
+            "in-progress": [],
+            completed: [],
+          } as SortedTasks;
+        }
+        const newSortedTasks: SortedTasks = {
+          ...oldSortedTasks,
+          [task.status]: oldSortedTasks[task.status].filter(
+            (t: Task) => t.id !== task.id
+          ),
+        };
+        return newSortedTasks;
+      },
+      rollbackOnError: true,
+      revalidate: true,
+    }
+  );
   return (
     <div
       id={String(task.id)}
@@ -53,8 +115,16 @@ export default function MobileTaskCard({ task }: { task: Task }) {
               >
                 Edit
               </a>
-              <button className="w-full px-3 py-1 text-sm text-danger text-left hover:bg-gray-100">
-                Delete
+              <button
+                className={clsx(
+                  "w-full px-3 py-1 text-sm text-danger text-left bg-white hover:bg-gray-100",
+                  {
+                    "cursor-not-allowed opacity-50 bg-gray-100": isMutating,
+                  }
+                )}
+                onClick={() => trigger()}
+              >
+                {isMutating ? "Deleting..." : "Delete"}
               </button>
             </PopoverContent>
           </Popover>

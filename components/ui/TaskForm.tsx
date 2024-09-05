@@ -264,6 +264,7 @@ export default function TaskForm() {
     data.status = taskData.status;
 
     if (!taskData.cover) delete data.cover;
+    if ((data.cover as File)?.size === 0) delete data.cover;
 
     const validatedFields =
       CreateTaskClientSchema.passthrough().safeParse(data);

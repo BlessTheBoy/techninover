@@ -22,6 +22,7 @@ import { CreateTaskClientSchema } from "../lib/zod";
 import useSWRMutation from "swr/mutation";
 import { SortedTasks, Task } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import { preload } from "swr";
 
 export default function Page() {
   const searchParams = useSearchParams();
@@ -49,7 +50,8 @@ export default function Page() {
     },
     {
       onSuccess: () => {
-        router.back();
+        // router.back();
+        router.push(`/?date=${currentDate}`);
       },
       onError: (error) => {
         toast({
@@ -103,11 +105,7 @@ export default function Page() {
           Add Task
         </p>
       </div>
-      <form
-        className="pb-10 pt-10"
-        // onSubmit={handleSubmit}
-        action={handleSubmit}
-      >
+      <form className="pb-10 pt-10" action={handleSubmit}>
         <div className="space-y-5 mb-12">
           <Input
             label="Task Name"
@@ -280,6 +278,7 @@ export default function Page() {
     data.status = taskData.status;
 
     if (!taskData.cover) delete data.cover;
+    if ((data.cover as File)?.size === 0) delete data.cover;
 
     const validatedFields =
       CreateTaskClientSchema.passthrough().safeParse(data);

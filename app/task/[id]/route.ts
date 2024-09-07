@@ -85,11 +85,17 @@ export async function PUT(
 
   const coverType = typeof body.cover;
 
-  const activeTask = await prisma.task.findUnique({
-    where: {
-      id: parseInt(id),
-    },
-  });
+  const activeTask = await prisma.task
+    .findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    })
+    .then((task) => task as Task | null);
+
+  if (!activeTask) {
+    return Response.json("Task not found", { status: 404 });
+  }
 
   if (
     coverType === "string" &&
@@ -124,6 +130,30 @@ export async function PUT(
       },
       data: { ...activeTask, ...body },
     });
+    if (body.status !== activeTask?.status) {
+      const order = await prisma.order
+        .findUnique({
+          where: {
+            date: activeTask?.date,
+          },
+        })
+        .then((order) => order as Order);
+      const orderKey = body.status.replace("-", "_") as keyof Order;
+      const prevOrderKey = activeTask?.status.replace("-", "_") as keyof Order;
+      await prisma.order.update({
+        where: {
+          date: activeTask?.date,
+        },
+        data: {
+          [prevOrderKey]:
+            order?.[prevOrderKey]
+              .split(",")
+              .filter((taskId) => taskId != id)
+              .join(",") ?? "",
+          [orderKey]: `${id},${order?.[orderKey]}`,
+        },
+      });
+    }
   } catch (error) {
     return Response.json("Failed to update task", { status: 500 });
   }

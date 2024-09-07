@@ -30,6 +30,9 @@ export async function GET(
     return Response.json(`Failed to fetch tasks for ${date}`, { status: 500 });
   }
 
+  console.log("tasks", tasks);
+  console.log("order", order);
+
   // const sortedTasks: SortedTasks = {
   //   todo: [],
   //   "in-progress": [],
@@ -53,6 +56,8 @@ export async function GET(
         .map((id) => tasks.find((task) => task.id == parseInt(id)))
         .filter(Boolean) as Task[]) ?? [],
   };
+
+  console.log("sortedTasks", sortedTasks);
 
   return Response.json(sortedTasks, { status: 200 });
 }

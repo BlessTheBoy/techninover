@@ -220,10 +220,6 @@ export default function Home() {
     }
   );
 
-  // console.log("data", tasks);
-  // console.log("isLoading", isLoading);
-  // console.log("error", error);
-
   return (
     <>
       <main className="px-3 py-6 md:py-10 md:px-8">
@@ -300,7 +296,7 @@ export default function Home() {
           )}
         </div>
       </main>
-      {/* <main className="block md:hidden">
+      <main className="block md:hidden">
         <div className="flex border-b border-gray-400 px-2 sticky top-0 bg-white">
           <div
             className={clsx(
@@ -319,7 +315,7 @@ export default function Home() {
                 { "text-white bg-purple": activeColumn === "todo" }
               )}
             >
-              {tasks.todo.length}
+              {tasks?.todo.length ?? 0}
             </div>
           </div>
           <div
@@ -339,7 +335,7 @@ export default function Home() {
                 { "text-white bg-purple": activeColumn === "in-progress" }
               )}
             >
-              {tasks["in-progress"].length}
+              {tasks?.["in-progress"].length ?? 0}
             </div>
           </div>
           <div
@@ -355,12 +351,16 @@ export default function Home() {
             <p className="font-inter font-medium text-sm">Completed</p>
           </div>
         </div>
-        <div className="space-y-4 pb-6">
-          {tasks[activeColumn].map((task) => (
-            <MobileTaskCard key={task.id} task={task} />
-          ))}
-        </div>
-      </main> */}
+        {tasks ? (
+          <div className="space-y-4 pb-6">
+            {tasks[activeColumn].map((task) => (
+              <MobileTaskCard key={task.id} task={task} />
+            ))}
+          </div>
+        ) : (
+          <div>loading...</div>
+        )}
+      </main>
     </>
   );
 
@@ -372,44 +372,9 @@ export default function Home() {
     setActiveTask(tasks?.[status].find((i) => i.id === active.id));
   }
 
-  // function handleDragEnd(event: DragEndEvent) {
-  //   const { active, over } = event;
-  //   // console.log("active.id, over.id", active, over);
-
-  //   if (over && active.id !== over?.id) {
-  //     setTasks((items) => {
-  //       const oldStatus = active.data.current?.sortable
-  //         .containerId as keyof typeof items;
-  //       const newStatus = over?.data.current?.sortable
-  //         .containerId as keyof typeof items;
-  //       const oldIndex = items[oldStatus].findIndex((i) => i.id === active.id);
-  //       const newIndex = items[newStatus].findIndex((i) => i.id === over?.id);
-
-  //       if (oldStatus === newStatus) {
-  //         return {
-  //           ...items,
-  //           [oldStatus]: arrayMove(items[oldStatus], oldIndex, newIndex),
-  //         };
-  //       } else {
-  //         return {
-  //           ...items,
-  //           [oldStatus]: items[oldStatus].filter((i) => i.id !== active.id),
-  //           [newStatus]: [
-  //             ...items[newStatus].slice(0, newIndex),
-  //             { ...items[oldStatus][oldIndex], status: newStatus },
-  //             ...items[newStatus].slice(newIndex),
-  //           ],
-  //         };
-  //       }
-  //     });
-  //   }
-
-  //   setActiveTask(undefined);
-  // }
-
   async function handleDragEnd(event: DragEndEvent) {
     setActiveTask(undefined);
-    console.log("handle drag end");
+    // console.log("handle drag end");
     const { active, over } = event;
     let newData: SortedTasks = {
       todo: [],
@@ -470,7 +435,7 @@ export default function Home() {
     const activeData: ItemData = active.data.current?.sortable;
     const overData: ItemData | undefined = over?.data.current?.sortable;
 
-    console.log("over id data: ", typeof overId, overId, overData);
+    // console.log("over id data: ", typeof overId, overId, overData);
 
     if (
       !tasks ||
@@ -485,7 +450,7 @@ export default function Home() {
     )
       return;
 
-    console.log("handle drag over");
+    // console.log("handle drag over");
 
     let newData: SortedTasks = {
       todo: [],

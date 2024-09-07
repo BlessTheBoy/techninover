@@ -28,85 +28,14 @@ import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
 import MobileTaskCard from "@/components/ui/MobileTaskCard";
-import useSWR, { Arguments, mutate } from "swr";
-import { useSearchParams } from "next/navigation";
+import useSWR, { mutate } from "swr";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import useSWRMutation from "swr/mutation";
 
-const todoTasksData: any[] = [
-  {
-    priority: "high",
-    id: 1,
-    title: "Create a new design",
-    status: "todo",
-    cover: "/overflowing-bookcases.jpg",
-    description:
-      "Write a blog post outlining the top 10 productivity tips for busy professionals. The post should be engaging, informative, and include actionable advice. Target word count: 1,200 words.",
-    deadline: "2024-08-31T13:34:43.051Z",
-  },
-  {
-    id: 2,
-    priority: "medium",
-    title: "Home Renovation",
-    description:
-      "Write a blog post outlining the top 10 productivity tips for busy professionals.",
-    status: "todo",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 3,
-    priority: "high",
-    title: "Organize a charity event",
-    status: "todo",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-];
-
-const inProgressTasksData: any[] = [
-  {
-    id: 7,
-    priority: "low",
-    title: "Watch a Frontend Tutorial",
-    status: "in-progress",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 8,
-    priority: "medium",
-    title: "Prep my week meal",
-    cover: "/meal-prep.avif",
-    status: "in-progress",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-];
-
-const completedTasksData: any[] = [
-  {
-    id: 10,
-    priority: "medium",
-    title: "Read a book",
-    cover: "/books.avif",
-    status: "completed",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 11,
-    priority: "low",
-    title: "Improve cards readability",
-    description: "As a team license owner, I want to use multiplied limits",
-    status: "completed",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-  {
-    id: 12,
-    priority: "high",
-    title: "Attend Standup and give updates",
-    status: "completed",
-    deadline: "2024-08-28T13:34:43.051Z",
-  },
-];
-
 export default function Home() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [activeTask, setActiveTask] = useState<Task | undefined>();
   const [activeColumn, setActiveColumn] = useState<
     "todo" | "in-progress" | "completed"
@@ -131,17 +60,15 @@ export default function Home() {
     })
   );
 
-  // const [tasks, setTasks] = useState({
-  //   todo: todoTasksData,
-  //   "in-progress": inProgressTasksData,
-  //   completed: completedTasksData,
-  // });
-
-  //  update (id, index, status)
-  // updatable auto index possible?
-
   const searchParams = useSearchParams();
+  const createPageURL = (date: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("date", date);
+    router.replace(`${pathname}?${params.toString()}`);
+  };
+
   const taskDate = searchParams.get("date");
+  console.log("taskDate", taskDate);
   const { toast } = useToast();
   const [currentDate, setCurrentDate] = useState<Date>(
     taskDate ? new Date(taskDate) : new Date()
@@ -238,25 +165,23 @@ export default function Home() {
             </p>
             <div
               className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100"
-              onClick={() =>
-                setCurrentDate((d) => {
-                  const newDate = new Date(d);
-                  newDate.setDate(d.getDate() - 1);
-                  return newDate;
-                })
-              }
+              onClick={() => {
+                const newDate = new Date(currentDate);
+                newDate.setDate(newDate.getDate() - 1);
+                createPageURL(newDate.toISOString().split("T")[0]);
+                setCurrentDate(newDate);
+              }}
             >
               <LeftArrow />
             </div>
             <div
               className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100"
-              onClick={() =>
-                setCurrentDate((d) => {
-                  const newDate = new Date(d);
-                  newDate.setDate(d.getDate() + 1);
-                  return newDate;
-                })
-              }
+              onClick={() => {
+                const newDate = new Date(currentDate);
+                newDate.setDate(newDate.getDate() + 1);
+                createPageURL(newDate.toISOString().split("T")[0]);
+                setCurrentDate(newDate);
+              }}
             >
               <RightArrow />
             </div>

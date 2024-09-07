@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { SortedTasks, Task } from "@/types";
+import { Order, SortedTasks, Task } from "@/types";
 
 const prisma = new PrismaClient();
 
@@ -10,6 +10,7 @@ export async function GET(
 ) {
   const date = params.date;
   let tasks: Task[] = [];
+  let order;
   try {
     tasks = await prisma.task
       .findMany({
@@ -18,31 +19,31 @@ export async function GET(
         },
       })
       .then((tasks) => tasks as Task[]);
+    order = await prisma.order.findUnique({
+      where: {
+        date: date,
+      },
+    }).then((order) => order as Order);
   } catch (error) {
     return Response.json(`Failed to fetch tasks for ${date}`, { status: 500 });
   }
   const sortedTasks: SortedTasks = {
-    todo: [],
-    "in-progress": [],
-    completed: [],
+    todo:
+      (order.todo
+        ?.split(",")
+        .map((id) => tasks.find((task) => task.id == parseInt(id)))
+        .filter(Boolean) as Task[]) ?? [],
+    "in-progress":
+      (order.in_progress
+        ?.split(",")
+        .map((id) => tasks.find((task) => task.id == parseInt(id)))
+        .filter(Boolean) as Task[]) ?? [],
+    completed:
+      (order.completed
+        ?.split(",")
+        .map((id) => tasks.find((task) => task.id == parseInt(id)))
+        .filter(Boolean) as Task[]) ?? [],
   };
 
-  tasks
-    .sort((a, b) => {
-      if (a.tracker && b.tracker) {
-        return a.tracker == b.tracker
-          ? a.updatedAt > b.updatedAt
-            ? -1
-            : 1
-          : a.tracker > b.tracker
-          ? -1
-          : 1;
-      }
-      return 0;
-    })
-    .forEach((task) => {
-      sortedTasks[task.status].push(task);
-    });
-  
   return Response.json(sortedTasks, { status: 200 });
 }

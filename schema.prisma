@@ -20,8 +20,15 @@ model Task {
   date        String
   cover       String?
   deadline    DateTime
-  tracker     Int      @default(autoincrement())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   deletedAt   DateTime?
 }
+
+model Order {
+  date        String @id
+  todo        String
+  in_progress String
+  completed   String
+}
+

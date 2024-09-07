@@ -5,15 +5,10 @@ export type Task = {
   priority: null | "low" | "medium" | "high";
   status: "todo" | "in-progress" | "completed";
   title: string;
-  tracker: number;
   deadline: Date;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: null | Date;
-  // deadline: string;
-  // createdAt: string;
-  // updatedAt: string;
-  // deletedAt: null | string;
   cover: string | null;
 };
 
@@ -21,4 +16,12 @@ export type SortedTasks = {
   todo: Task[];
   "in-progress": Task[];
   completed: Task[];
+};
+
+export type ItemData = { containerId: Task["status"]; index: number };
+
+export type Order = {
+  todo: string;
+  in_progress: string;
+  completed: string;
 };

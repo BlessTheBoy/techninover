@@ -1,5 +1,5 @@
 import { CreateTaskServerSchema } from "@/app/lib/zod";
-import { SortedTasks, Task } from "@/types";
+import { Order, SortedTasks, Task } from "@/types";
 import { PrismaClient } from "@prisma/client";
 import { del, put } from "@vercel/blob";
 import { NextRequest } from "next/server";
@@ -34,12 +34,39 @@ export async function DELETE(
 ) {
   const id = params.id;
 
+  // get task status
+  const task = await prisma.task.findUnique({
+    where: {
+      id: parseInt(id),
+    },
+  });
+  const order = await prisma.order.findUnique({
+    where: {
+      date: task?.date,
+    },
+  });
+  const orderKey = task?.status.replace("-", "_") as keyof Order;
+
   try {
-    await prisma.task.delete({
-      where: {
-        id: parseInt(id),
-      },
-    });
+    await prisma.$transaction([
+      prisma.task.delete({
+        where: {
+          id: parseInt(id),
+        },
+      }),
+      prisma.order.update({
+        where: {
+          date: new Date().toISOString().split("T")[0],
+        },
+        data: {
+          [orderKey]:
+            order?.[orderKey]
+              .split(",")
+              .filter((taskId) => taskId != id)
+              .join(",") ?? "",
+        },
+      }),
+    ]);
     return Response.json("Task deleted", { status: 200 });
   } catch (error) {
     return Response.json("Failed to delete task", { status: 500 });
@@ -104,40 +131,40 @@ export async function PUT(
   // conclusion
   const date = body.date;
   let tasks: Task[] = [];
+  let order: Order;
   try {
-    tasks = await prisma.task
-      .findMany({
-        where: {
-          date: date,
-        },
-      })
-      .then((tasks) => tasks as Task[]);
+    [tasks, order] = await Promise.all([
+      prisma.task.findMany({
+      where: {
+        date: date,
+      },
+      }).then((tasks) => tasks as Task[]),
+      prisma.order.findUnique({
+      where: {
+        date: date,
+      },
+      }).then((order) => order as Order),
+    ]);
   } catch (error) {
     return Response.json(`Failed to fetch tasks for ${date}`, { status: 500 });
   }
-
   const sortedTasks: SortedTasks = {
-    todo: [],
-    "in-progress": [],
-    completed: [],
+    todo:
+      (order.todo
+        ?.split(",")
+        .map((id) => tasks.find((task) => task.id == parseInt(id)))
+        .filter(Boolean) as Task[]) ?? [],
+    "in-progress":
+      (order.in_progress
+        ?.split(",")
+        .map((id) => tasks.find((task) => task.id == parseInt(id)))
+        .filter(Boolean) as Task[]) ?? [],
+    completed:
+      (order.completed
+        ?.split(",")
+        .map((id) => tasks.find((task) => task.id == parseInt(id)))
+        .filter(Boolean) as Task[]) ?? [],
   };
-
-  tasks
-    .sort((a, b) => {
-      if (a.tracker && b.tracker) {
-        return a.tracker == b.tracker
-          ? a.updatedAt > b.updatedAt
-            ? -1
-            : 1
-          : a.tracker > b.tracker
-          ? -1
-          : 1;
-      }
-      return 0;
-    })
-    .forEach((task) => {
-      sortedTasks[task.status].push(task);
-    });
 
   return Response.json(sortedTasks, { status: 200 });
 }

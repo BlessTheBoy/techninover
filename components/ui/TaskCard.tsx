@@ -19,10 +19,12 @@ export default function TaskCard({
   task,
   attributes,
   listeners,
+  overlay
 }: {
   task: Task;
   attributes?: DraggableAttributes;
   listeners?: SyntheticListenerMap;
+  overlay?: boolean;
 }) {
 
   preload(`${task.id}`, async () => {
@@ -90,7 +92,9 @@ export default function TaskCard({
   return (
     <div
       id={String(task.id)}
-      className="space-y-4 p-4 rounded-md bg-white shadow-card"
+      className={clsx("space-y-4 p-4 rounded-md bg-white shadow-card", {
+        "cursor-move": overlay,
+      })}
     >
       <div {...attributes} {...listeners}>
         {task.priority ? (

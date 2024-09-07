@@ -20,7 +20,7 @@ import TaskCard from "@/components/ui/TaskCard";
 import LeftArrow from "@/components/ui/svgs/left-arrow";
 import RightArrow from "@/components/ui/svgs/right-arrow";
 import Search from "@/components/ui/Search";
-import { SortedTasks, Task } from "@/types";
+import { ItemData, Order, SortedTasks, Task } from "@/types";
 import TodoColumn from "@/components/ui/TodoColumn";
 import InProgressColumn from "@/components/ui/InProgressColumn";
 import CompletedColumn from "@/components/ui/CompletedColumn";
@@ -192,51 +192,10 @@ export default function Home() {
 
   const { trigger: onDragEnd } = useSWRMutation(
     currentDateString,
-    async (_, { arg }: { arg: DragEndEvent }) => {
-      const { active, over } = arg;
+    async (_, { arg }: { arg: Order }) => {
       const res = await fetch(`/api`, {
         method: "put",
-        body: JSON.stringify({
-          activeId: active.id,
-          overId: over?.id,
-        }),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        throw result;
-      }
-
-      return result as SortedTasks;
-    },
-    {
-      onError: (error) => {
-        toast({
-          variant: "destructive",
-          title: "Error updating task.",
-          description: error,
-        });
-      },
-      populateCache: (newSortedTasks) => newSortedTasks,
-      revalidate: false,
-      rollbackOnError: true,
-    }
-  );
-
-  const { trigger: onDragOver } = useSWRMutation(
-    currentDateString,
-    async (_, { arg }: { arg: DragOverEvent }) => {
-      const { active, over, delta } = arg;
-
-      const res = await fetch(`/api`, {
-        method: "put",
-        body: JSON.stringify({
-          activeId: active.id,
-          overId: over ? over.id : null,
-          newColumn: over?.data.current?.sortable.containerId as Task["status"],
-          delta: delta.y,
-        }),
+        body: JSON.stringify(arg),
       });
 
       const result = await res.json();
@@ -333,7 +292,7 @@ export default function Home() {
                 />
               </div>
               <DragOverlay>
-                {activeTask ? <TaskCard task={activeTask} /> : null}
+                {activeTask ? <TaskCard task={activeTask} overlay /> : null}
               </DragOverlay>
             </DndContext>
           ) : (
@@ -449,6 +408,7 @@ export default function Home() {
   // }
 
   async function handleDragEnd(event: DragEndEvent) {
+    setActiveTask(undefined);
     console.log("handle drag end");
     const { active, over } = event;
     let newData: SortedTasks = {
@@ -456,81 +416,135 @@ export default function Home() {
       "in-progress": [],
       completed: [],
     };
-    console.log("active.id, over.id", active, over);
+    const activeData: { containerId: Task["status"]; index: number } =
+      active.data.current?.sortable;
+    const overData: { containerId: Task["status"]; index: number } | undefined =
+      over?.data.current?.sortable;
 
-    if (tasks && over && active.id !== over?.id) {
-      const oldStatus = active.data.current?.sortable
-        .containerId as Task["status"];
-      const newStatus = over?.data.current?.sortable
-        .containerId as Task["status"];
-      const oldIndex = tasks[oldStatus].findIndex((i) => i.id === active.id);
-      const newIndex = tasks[newStatus].findIndex((i) => i.id === over?.id);
+    if (!overData || !(tasks && over && active.id !== over?.id)) return;
 
-      if (oldStatus === newStatus) {
-        newData = {
-          ...tasks,
-          [oldStatus]: arrayMove(tasks[oldStatus], oldIndex, newIndex),
-        };
-      } else {
-        newData = {
-          ...tasks,
-          [oldStatus]: tasks[oldStatus].filter((i) => i.id !== active.id),
-          [newStatus]: [
-            ...tasks[newStatus].slice(0, newIndex),
-            { ...tasks[oldStatus][oldIndex], status: newStatus },
-            ...tasks[newStatus].slice(newIndex),
-          ],
-        };
-      }
-      // onDragEnd(event, {
-      //   optimisticData: newData,
-      // });
-      setActiveTask(undefined);
+    // console.log("active.id, over.id", activeData, overData);
+
+    if (activeData.containerId === overData.containerId) {
+      newData = {
+        ...tasks,
+        [activeData.containerId]: arrayMove(
+          tasks[activeData.containerId],
+          activeData.index,
+          overData.index
+        ),
+      };
+    } else {
+      newData = {
+        ...tasks,
+        [activeData.containerId]: tasks[activeData.containerId].filter(
+          (i) => i.id !== active.id
+        ),
+        [overData.containerId]: [
+          ...tasks[overData.containerId].slice(0, overData.index),
+          {
+            ...tasks[activeData.containerId][activeData.index],
+            status: overData.containerId,
+          },
+          ...tasks[overData.containerId].slice(overData.index),
+        ],
+      };
     }
+    const order: Order = {
+      todo: newData.todo.map((i) => i.id).join(","),
+      "in_progress": newData["in-progress"].map((i) => i.id).join(","),
+      completed: newData.completed.map((i) => i.id).join(","),
+    };
+    onDragEnd(order, {
+      optimisticData: newData,
+      revalidate: false,
+    });
+
+    // mutate(`${currentDateString}`, newData, {
+    // });
   }
 
   async function handleDragOver(event: DragOverEvent) {
     const { active, over, delta } = event;
-    const activeId = active.id;
-    const overId = over ? over.id : null;
-    const activeColumn = active.data.current?.sortable
-      .containerId as Task["status"];
-    const overColumn = over?.data.current?.sortable
-      .containerId as Task["status"];
+    const overId = over?.id as Task["status"] | undefined;
+    const activeData: ItemData = active.data.current?.sortable;
+    const overData: ItemData | undefined = over?.data.current?.sortable;
 
-    if (!activeColumn || !overColumn || activeColumn === overColumn || !tasks) {
-      return null;
-    }
+    console.log("over id data: ", typeof overId, overId, overData);
+
+    if (
+      !tasks ||
+      !(
+        (typeof overId == "number" &&
+          overData &&
+          overData.containerId !== activeData.containerId) ||
+        (typeof overId == "string" &&
+          overId !== activeData.containerId &&
+          overData == undefined)
+      )
+    )
+      return;
+
     console.log("handle drag over");
+
     let newData: SortedTasks = {
       todo: [],
       "in-progress": [],
       completed: [],
     };
-    const activeItems = tasks[activeColumn];
-    const overItems = tasks[overColumn];
-    const activeIndex = activeItems.findIndex((i) => i.id === activeId);
-    const overIndex = overItems.findIndex((i) => i.id === overId);
-    const newIndex = () => {
-      const putOnBelowLastItem =
-        overIndex === overItems.length - 1 && delta.y > 0;
-      const modifier = putOnBelowLastItem ? 1 : 0;
-      return overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
-    };
 
-    newData = {
-      ...tasks,
-      [activeColumn]: activeItems.filter((i) => i.id !== activeId),
-      [overColumn]: [
-        ...overItems.slice(0, newIndex()),
-        { ...activeItems[activeIndex], status: overColumn },
-        ...overItems.slice(newIndex(), overItems.length),
-      ],
-    };
+    if (typeof overId == "number" && overData) {
+      const overItemsLength = tasks[overData.containerId].length;
+      const putBelowLastItem =
+        delta.y > 0 && overItemsLength - 1 == overData.index;
 
-    // onDragOver(event, {
-    //   optimisticData: newData,
-    // });
-    setActiveTask(undefined);
+      if (putBelowLastItem) {
+        newData = {
+          ...tasks,
+          [activeData.containerId]: tasks[activeData.containerId].filter(
+            (i) => i.id !== active.id
+          ),
+          [overData.containerId]: [
+            ...tasks[overData.containerId],
+            {
+              ...tasks[activeData.containerId][activeData.index],
+              status: overData.containerId,
+            },
+          ],
+        };
+      } else {
+        newData = {
+          ...tasks,
+          [activeData.containerId]: tasks[activeData.containerId].filter(
+            (i) => i.id !== active.id
+          ),
+          [overData.containerId]: [
+            ...tasks[overData.containerId].slice(0, overData.index),
+            {
+              ...tasks[activeData.containerId][activeData.index],
+              status: overData.containerId,
+            },
+            ...tasks[overData.containerId].slice(overData.index),
+          ],
+        };
+      }
+    } else if (typeof overId == "string") {
+      newData = {
+        ...tasks,
+        [activeData.containerId]: tasks[activeData.containerId].filter(
+          (i) => i.id !== active.id
+        ),
+        [overId]: [
+          ...tasks[overId],
+          {
+            ...tasks[activeData.containerId][activeData.index],
+            status: overId,
+          },
+        ],
+      };
+    }
+    mutate(`${currentDateString}`, newData, {
+      revalidate: false,
+    });
   }
 }

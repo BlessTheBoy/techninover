@@ -4,6 +4,7 @@ import SideNav from "@/components/ui/SideNav";
 import { inter, sfPro } from "@/components/ui/fonts";
 import FAB from "@/components/ui/FAB";
 import { Toaster } from "@/components/ui/toaster";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -26,7 +27,9 @@ export default function RootLayout({
           <div className="w-full flex-none md:w-fit lg:w-[17.25rem]">
             <SideNav />
           </div>
-          <div className="flex-grow md:overflow-y-auto">{children}</div>
+          <div className="flex-grow md:overflow-y-auto">
+            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+          </div>
         </div>
         <div className="hidden md:block">{modal}</div>
         <FAB />

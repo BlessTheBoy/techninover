@@ -32,6 +32,9 @@ import useSWR, { mutate } from "swr";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import useSWRMutation from "swr/mutation";
+import TaskListLoader, {
+  MobileTaskListLoader,
+} from "@/components/ui/TaskListLoader";
 
 export default function Home() {
   const router = useRouter();
@@ -217,7 +220,7 @@ export default function Home() {
               </DragOverlay>
             </DndContext>
           ) : (
-            <div>loading...</div>
+            <TaskListLoader />
           )}
         </div>
       </main>
@@ -283,7 +286,7 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <div>loading...</div>
+          <MobileTaskListLoader />
         )}
       </main>
     </>

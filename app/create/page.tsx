@@ -22,6 +22,7 @@ import { CreateTaskClientSchema } from "@/lib/zod";
 import useSWRMutation from "swr/mutation";
 import { SortedTasks } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import { preload } from "swr";
 
 export default function Page() {
   const searchParams = useSearchParams();
@@ -30,6 +31,19 @@ export default function Page() {
   const { toast } = useToast();
 
   const currentDate = taskDate ?? new Date().toISOString().split("T")[0];
+  preload(currentDate, async () => {
+    const res = await fetch(`/api/${currentDate}`, {
+      method: "get",
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw result;
+    }
+
+    return result as SortedTasks;
+  });
 
   const { trigger, isMutating } = useSWRMutation(
     currentDate,

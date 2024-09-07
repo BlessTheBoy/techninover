@@ -24,6 +24,7 @@ import { notFound, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import useSWR, { preload } from "swr";
 import useSWRMutation from "swr/mutation";
+import TaskFormLoader from "@/components/ui/TaskFormLoader";
 
 export default function Page({ params }: { params: { id: string } }) {
   const { toast } = useToast();
@@ -131,7 +132,23 @@ export default function Page({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  if (!task) return null;
+  const today = new Date();
+  const currentDateString = today.toISOString().split("T")[0];
+  if (task && task.date !== currentDateString) {
+    preload(task.date, async () => {
+      const res = await fetch(`/api/${task.date}`, {
+        method: "get",
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw result;
+      }
+
+      return result as SortedTasks;
+    });
+  }
 
   return (
     <main className="px-3 py-6 md:py-10 md:px-8">
@@ -146,158 +163,163 @@ export default function Page({ params }: { params: { id: string } }) {
           Edit Task
         </p>
       </div>
-      <form className="pb-10 pt-10" action={handleSubmit}>
-        <div className="space-y-5 mb-12">
-          <Input
-            label="Task Name"
-            placeholder="Enter task name"
-            defaultValue={task?.title}
-            name="title"
-            error={fieldError.title}
-          />
-          <TextArea
-            label="Description"
-            placeholder="Enter task description"
-            name="description"
-            optional
-            error={fieldError.description}
-            defaultValue={task?.description ?? undefined}
-          />
-          <div className="grid items-center gap-1.5">
-            <label className="font-inter font-medium text-sm text-text_header">
-              Status
-            </label>
-            <Select
-              onValueChange={(v) =>
-                setTaskData({
-                  ...taskData,
-                  status: v as "todo" | "in-progress" | "completed",
-                })
-              }
-              defaultValue={taskData.status}
-              name="status"
-            >
-              <SelectTrigger className="h-12 rounded-xl border border-gray_8 placeholder:text-[#848585] w-full px-[14px] outline-purple">
-                <SelectValue placeholder="Select task status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem
-                    value="todo"
-                    className="text-error hover:bg-error_bg"
-                  >
-                    To do
-                  </SelectItem>
-                  <SelectItem
-                    value="in-progress"
-                    className="text-medium hover:bg-medium_bg"
-                  >
-                    In progress
-                  </SelectItem>
-                  <SelectItem
-                    value="completed"
-                    className="text-success hover:text-success hover:bg-success_bg"
-                  >
-                    Completed
-                  </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            {fieldError.status ? (
-              <p className="text-error text-xs">{fieldError.status}</p>
-            ) : null}
-          </div>
-          <div className="grid items-center gap-1.5">
-            <label className="font-inter font-medium text-sm text-text_header">
-              Priority
-            </label>
-            <Select
-              onValueChange={(v) =>
-                setTaskData({
-                  ...taskData,
-                  priority: v as "low" | "medium" | "high",
-                })
-              }
-              defaultValue={taskData.priority}
-              name="priority"
-            >
-              <SelectTrigger className="h-12 rounded-xl border border-gray_8 placeholder:text-[#848585] w-full px-[14px] outline-purple">
-                {taskData.priority ? (
-                  <div
-                    className={clsx(
-                      "h-6 px-2 rounded-[0.25rem] flex justify-center items-center w-fit text-[#848585]",
-                      {
-                        "bg-success_bg text-success font-inter font-medium text-xs":
-                          taskData.priority == "high",
-                      },
-                      {
-                        "bg-medium_bg text-medium font-inter font-medium text-xs":
-                          taskData.priority == "medium",
-                      },
-                      {
-                        "bg-error_bg text-error font-inter font-medium text-xs":
-                          taskData.priority == "low",
-                      }
-                    )}
-                  >
-                    {taskData.priority.toUpperCase()}
-                  </div>
-                ) : (
-                  <span className="text-[#848585]">Select task priority</span>
-                )}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem
-                    value="high"
-                    className="text-success hover:text-success hover:bg-success_bg"
-                  >
-                    High
-                  </SelectItem>
-                  <SelectItem
-                    value="medium"
-                    className="text-medium hover:bg-medium_bg"
-                  >
-                    Medium
-                  </SelectItem>
-                  <SelectItem
-                    value="low"
-                    className="text-error hover:bg-error_bg"
-                  >
-                    Low
-                  </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            {fieldError.priority ? (
-              <p className="text-error text-xs">{fieldError.priority}</p>
-            ) : null}
-          </div>
-          <ImageUploader
-            image={taskData.cover}
-            setImage={(v) => setTaskData({ ...taskData, cover: v })}
-            label="Upload cover"
-            optional
-          />
-          <div className="flex gap-4">
-            <DatePicker
-              label="Deadline"
-              date={taskData.date}
-              setDate={(v) => setTaskData({ ...taskData, date: v })}
-              error={fieldError.date}
+
+      {isLoading ? (
+        <TaskFormLoader />
+      ) : (
+        <form className="pb-10 pt-10" action={handleSubmit}>
+          <div className="space-y-5 mb-12">
+            <Input
+              label="Task Name"
+              placeholder="Enter task name"
+              defaultValue={task?.title}
+              name="title"
+              error={fieldError.title}
             />
-            <TimePicker
-              label="Time"
-              time={taskData.time}
-              setTime={(v) => setTaskData({ ...taskData, time: v })}
-              error={fieldError.time}
+            <TextArea
+              label="Description"
+              placeholder="Enter task description"
+              name="description"
+              optional
+              error={fieldError.description}
+              defaultValue={task?.description ?? undefined}
             />
+            <div className="grid items-center gap-1.5">
+              <label className="font-inter font-medium text-sm text-text_header">
+                Status
+              </label>
+              <Select
+                onValueChange={(v) =>
+                  setTaskData({
+                    ...taskData,
+                    status: v as "todo" | "in-progress" | "completed",
+                  })
+                }
+                defaultValue={taskData.status}
+                name="status"
+              >
+                <SelectTrigger className="h-12 rounded-xl border border-gray_8 placeholder:text-[#848585] w-full px-[14px] outline-purple">
+                  <SelectValue placeholder="Select task status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem
+                      value="todo"
+                      className="text-error hover:bg-error_bg"
+                    >
+                      To do
+                    </SelectItem>
+                    <SelectItem
+                      value="in-progress"
+                      className="text-medium hover:bg-medium_bg"
+                    >
+                      In progress
+                    </SelectItem>
+                    <SelectItem
+                      value="completed"
+                      className="text-success hover:text-success hover:bg-success_bg"
+                    >
+                      Completed
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              {fieldError.status ? (
+                <p className="text-error text-xs">{fieldError.status}</p>
+              ) : null}
+            </div>
+            <div className="grid items-center gap-1.5">
+              <label className="font-inter font-medium text-sm text-text_header">
+                Priority
+              </label>
+              <Select
+                onValueChange={(v) =>
+                  setTaskData({
+                    ...taskData,
+                    priority: v as "low" | "medium" | "high",
+                  })
+                }
+                defaultValue={taskData.priority}
+                name="priority"
+              >
+                <SelectTrigger className="h-12 rounded-xl border border-gray_8 placeholder:text-[#848585] w-full px-[14px] outline-purple">
+                  {taskData.priority ? (
+                    <div
+                      className={clsx(
+                        "h-6 px-2 rounded-[0.25rem] flex justify-center items-center w-fit text-[#848585]",
+                        {
+                          "bg-success_bg text-success font-inter font-medium text-xs":
+                            taskData.priority == "high",
+                        },
+                        {
+                          "bg-medium_bg text-medium font-inter font-medium text-xs":
+                            taskData.priority == "medium",
+                        },
+                        {
+                          "bg-error_bg text-error font-inter font-medium text-xs":
+                            taskData.priority == "low",
+                        }
+                      )}
+                    >
+                      {taskData.priority.toUpperCase()}
+                    </div>
+                  ) : (
+                    <span className="text-[#848585]">Select task priority</span>
+                  )}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem
+                      value="high"
+                      className="text-success hover:text-success hover:bg-success_bg"
+                    >
+                      High
+                    </SelectItem>
+                    <SelectItem
+                      value="medium"
+                      className="text-medium hover:bg-medium_bg"
+                    >
+                      Medium
+                    </SelectItem>
+                    <SelectItem
+                      value="low"
+                      className="text-error hover:bg-error_bg"
+                    >
+                      Low
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              {fieldError.priority ? (
+                <p className="text-error text-xs">{fieldError.priority}</p>
+              ) : null}
+            </div>
+            <ImageUploader
+              image={taskData.cover}
+              setImage={(v) => setTaskData({ ...taskData, cover: v })}
+              label="Upload cover"
+              optional
+            />
+            <div className="space-y-5 md:space-y-0 md:flex md:gap-4">
+              <DatePicker
+                label="Deadline"
+                date={taskData.date}
+                setDate={(v) => setTaskData({ ...taskData, date: v })}
+                error={fieldError.date}
+              />
+              <TimePicker
+                label="Time"
+                time={taskData.time}
+                setTime={(v) => setTaskData({ ...taskData, time: v })}
+                error={fieldError.time}
+              />
+            </div>
           </div>
-        </div>
-        <Button type="submit" className="w-full" disabled={isMutating}>
-          {isMutating ? "Saving Task..." : "Save Task"}
-        </Button>
-      </form>
+          <Button type="submit" className="w-full" disabled={isMutating}>
+            {isMutating ? "Saving Task..." : "Save Task"}
+          </Button>
+        </form>
+      )}
     </main>
   );
 

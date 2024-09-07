@@ -1,16 +1,15 @@
-import { z } from "zod";
 import { PrismaClient } from "@prisma/client";
-import { CreateTaskServerSchema } from "../lib/zod";
 
 const prisma = new PrismaClient();
 
-type CreateTask = z.infer<typeof CreateTaskServerSchema>;
-
-export async function createTask(body: any) {
+async function createTask(body: any) {
   try {
-    await prisma.task.create({
-      data: body,
-    });
+    const id = await prisma.task
+      .create({
+        data: body,
+      })
+      .then((task) => task.id);
+    return id;
   } catch (error) {
     console.error(error);
     return {
@@ -19,12 +18,6 @@ export async function createTask(body: any) {
       success: false,
     };
   }
-
-  return {
-    status: 200,
-    body,
-    success: true,
-  };
 }
 
 const todos = [
@@ -87,13 +80,47 @@ const todos = [
 ];
 
 async function seedTodo() {
+  const todoTasks = todos
+    .filter((t) => !t.cover)
+    .filter((t) => t.status == "todo");
+  console.log("todoTasks", todoTasks);
   const insertedTodos = await Promise.all(
-    todos.filter((t) => !t.cover).map(async (todo) => createTask({...todo, date:"2024-09-05"}))
+    todoTasks.map(async (todo) => createTask({ ...todo, date: "2024-09-07" }))
   );
-  return insertedTodos;
+  const in_progressTasks = todos
+    .filter((t) => !t.cover)
+    .filter((t) => t.status == "in-progress");
+  console.log("in_progressTasks", in_progressTasks);
+  const insertedInProgress = await Promise.all(
+    in_progressTasks.map(async (todo) =>
+      createTask({ ...todo, date: "2024-09-07" })
+    )
+  );
+
+  const completedTasks = todos
+    .filter((t) => !t.cover)
+    .filter((t) => t.status == "completed");
+  console.log("completedTasks", completedTasks);
+  const insertedCompleted = await Promise.all(
+    completedTasks.map(async (todo) =>
+      createTask({ ...todo, date: "2024-09-07" })
+    )
+  );
+
+  const updatedOrder = await prisma.order.create({
+    data: {
+      date: "2024-09-07",
+      todo: insertedTodos.join(","),
+      in_progress: insertedInProgress.join(","),
+      completed: insertedCompleted.join(","),
+    },
+  });
+  console.log("updatedOrder", updatedOrder);
+  // return updatedOrder;
 }
 
 export async function GET() {
+  console.log("Seeding database");
   try {
     await prisma.task.deleteMany();
     await seedTodo();

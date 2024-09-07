@@ -18,7 +18,7 @@ import { Button } from "./button";
 import { useRouter, useSearchParams } from "next/navigation";
 import useSWRMutation from "swr/mutation";
 import { useToast } from "@/hooks/use-toast";
-import { CreateTaskClientSchema } from "@/app/lib/zod";
+import { CreateTaskClientSchema } from "@/lib/zod";
 import { SortedTasks, Task } from "@/types";
 
 export default function TaskForm() {

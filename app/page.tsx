@@ -195,7 +195,7 @@ export default function Home() {
     async (_, { arg }: { arg: Order }) => {
       const res = await fetch(`/api`, {
         method: "put",
-        body: JSON.stringify(arg),
+        body: JSON.stringify({ order: arg, date: currentDateString }),
       });
 
       const result = await res.json();
@@ -452,7 +452,7 @@ export default function Home() {
     }
     const order: Order = {
       todo: newData.todo.map((i) => i.id).join(","),
-      "in_progress": newData["in-progress"].map((i) => i.id).join(","),
+      in_progress: newData["in-progress"].map((i) => i.id).join(","),
       completed: newData.completed.map((i) => i.id).join(","),
     };
     onDragEnd(order, {

@@ -5,15 +5,15 @@ import { Order, SortedTasks, Task } from "@/types";
 const prisma = new PrismaClient();
 
 export async function PUT(request: NextRequest) {
-  const {order, date}: {order: Order; date: string} = await request.json();
+  const { order, date }: { order: Order; date: string } = await request.json();
 
   try {
     await prisma.order.update({
       where: {
-        date: date
+        date: date,
       },
       data: order,
-    })
+    });
   } catch (error) {
     return Response.json("Failed to update tasks order", { status: 500 });
   }
@@ -29,12 +29,25 @@ export async function PUT(request: NextRequest) {
       })
       .then((tasks) => tasks as Task[]);
   } catch (error) {
+    console.error("error", error);
     return Response.json(`Failed to fetch tasks for ${date}`, { status: 500 });
   }
   const sortedTasks: SortedTasks = {
-    todo: order.todo?.split(",").map((id) => tasks.find((task) => task.id == parseInt(id))).filter(Boolean) as Task[] ?? [],
-    "in-progress": order.in_progress?.split(",").map((id) => tasks.find((task) => task.id == parseInt(id))).filter(Boolean) as Task[] ?? [],
-    completed: order.completed?.split(",").map((id) => tasks.find((task) => task.id == parseInt(id))).filter(Boolean) as Task[] ?? [],
+    todo:
+      (order.todo
+        ?.split(",")
+        .map((id) => tasks.find((task) => task.id == parseInt(id)))
+        .filter(Boolean) as Task[]) ?? [],
+    "in-progress":
+      (order.in_progress
+        ?.split(",")
+        .map((id) => tasks.find((task) => task.id == parseInt(id)))
+        .filter(Boolean) as Task[]) ?? [],
+    completed:
+      (order.completed
+        ?.split(",")
+        .map((id) => tasks.find((task) => task.id == parseInt(id)))
+        .filter(Boolean) as Task[]) ?? [],
   };
 
   return Response.json(sortedTasks, { status: 200 });

@@ -36,7 +36,7 @@ export default function CompletedColumn({
         items={completedTasks}
         strategy={rectSortingStrategy}
       >
-        <div className="grid grid-cols-1 gap-4" ref={setNodeRef}>
+        <div className="grid grid-cols-1 gap-4 min-h-16" ref={setNodeRef}>
           {completedTasks.map((task) => (
             <SortableItem
               key={task.id}

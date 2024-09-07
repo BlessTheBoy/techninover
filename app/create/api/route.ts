@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { CreateTaskServerSchema } from "../../lib/zod";
+import { CreateTaskServerSchema } from "@/lib/zod";
 import { put } from "@vercel/blob";
 import { PrismaClient } from "@prisma/client";
 import { Order, SortedTasks, Task } from "@/types";

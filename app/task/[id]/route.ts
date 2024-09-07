@@ -1,4 +1,4 @@
-import { CreateTaskServerSchema } from "@/app/lib/zod";
+import { CreateTaskServerSchema } from "@/lib/zod";
 import { Order, SortedTasks, Task } from "@/types";
 import { PrismaClient } from "@prisma/client";
 import { del, put } from "@vercel/blob";
@@ -131,36 +131,40 @@ export async function PUT(
   // conclusion
   const date = body.date;
   let tasks: Task[] = [];
-  let order: Order;
+  let order: Order | null;
   try {
     [tasks, order] = await Promise.all([
-      prisma.task.findMany({
-      where: {
-        date: date,
-      },
-      }).then((tasks) => tasks as Task[]),
-      prisma.order.findUnique({
-      where: {
-        date: date,
-      },
-      }).then((order) => order as Order),
+      prisma.task
+        .findMany({
+          where: {
+            date: date,
+          },
+        })
+        .then((tasks) => tasks as Task[]),
+      prisma.order
+        .findUnique({
+          where: {
+            date: date,
+          },
+        })
+        .then((order) => order as Order | null),
     ]);
   } catch (error) {
     return Response.json(`Failed to fetch tasks for ${date}`, { status: 500 });
   }
   const sortedTasks: SortedTasks = {
     todo:
-      (order.todo
+      (order?.todo
         ?.split(",")
         .map((id) => tasks.find((task) => task.id == parseInt(id)))
         .filter(Boolean) as Task[]) ?? [],
     "in-progress":
-      (order.in_progress
+      (order?.in_progress
         ?.split(",")
         .map((id) => tasks.find((task) => task.id == parseInt(id)))
         .filter(Boolean) as Task[]) ?? [],
     completed:
-      (order.completed
+      (order?.completed
         ?.split(",")
         .map((id) => tasks.find((task) => task.id == parseInt(id)))
         .filter(Boolean) as Task[]) ?? [],

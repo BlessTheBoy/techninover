@@ -1,6 +1,6 @@
 "use client";
 
-import { CreateTaskClientSchema } from "@/app/lib/zod";
+import { CreateTaskClientSchema } from "@/lib/zod";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/DatePicker";
 import ImageUploader from "@/components/ui/ImageUploader";

@@ -21,7 +21,7 @@ import { SortedTasks, Task } from "@/types";
 import useSWR from "swr";
 import { useToast } from "@/hooks/use-toast";
 import useSWRMutation from "swr/mutation";
-import { CreateTaskClientSchema } from "@/app/lib/zod";
+import { CreateTaskClientSchema } from "@/lib/zod";
 
 export default function TaskEditForm({ id }: { id: number }) {
   const { toast } = useToast();
@@ -55,8 +55,8 @@ export default function TaskEditForm({ id }: { id: number }) {
         });
       },
       onSuccess: (data) => {
-        setTaskData((t) =>{
-          if(t.status) return t;
+        setTaskData((t) => {
+          if (t.status) return t;
           return {
             status: data.status,
             priority: data.priority ?? undefined,
@@ -69,7 +69,7 @@ export default function TaskEditForm({ id }: { id: number }) {
     }
   );
 
-  console.log("task", task)
+  console.log("task", task);
 
   const { trigger, isMutating } = useSWRMutation(
     `${task?.date}`,

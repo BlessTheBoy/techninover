@@ -18,11 +18,10 @@ import clsx from "clsx";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
-import { CreateTaskClientSchema } from "../lib/zod";
+import { CreateTaskClientSchema } from "@/lib/zod";
 import useSWRMutation from "swr/mutation";
-import { SortedTasks, Task } from "@/types";
+import { SortedTasks } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { preload } from "swr";
 
 export default function Page() {
   const searchParams = useSearchParams();

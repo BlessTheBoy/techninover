@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "prisma generate && prisma migrate deploy && next dev",
+    "dev": "prisma generate && next dev",
     "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "build": "next build",
     "start": "next start",

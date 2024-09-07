@@ -19,27 +19,36 @@ export async function GET(
         },
       })
       .then((tasks) => tasks as Task[]);
-    order = await prisma.order.findUnique({
-      where: {
-        date: date,
-      },
-    }).then((order) => order as Order);
+    order = await prisma.order
+      .findUnique({
+        where: {
+          date: date,
+        },
+      })
+      .then((order) => order as Order | null);
   } catch (error) {
     return Response.json(`Failed to fetch tasks for ${date}`, { status: 500 });
   }
+
+  // const sortedTasks: SortedTasks = {
+  //   todo: [],
+  //   "in-progress": [],
+  //   completed: [],
+  // };
+
   const sortedTasks: SortedTasks = {
     todo:
-      (order.todo
+      (order?.todo
         ?.split(",")
         .map((id) => tasks.find((task) => task.id == parseInt(id)))
         .filter(Boolean) as Task[]) ?? [],
     "in-progress":
-      (order.in_progress
+      (order?.in_progress
         ?.split(",")
         .map((id) => tasks.find((task) => task.id == parseInt(id)))
         .filter(Boolean) as Task[]) ?? [],
     completed:
-      (order.completed
+      (order?.completed
         ?.split(",")
         .map((id) => tasks.find((task) => task.id == parseInt(id)))
         .filter(Boolean) as Task[]) ?? [],

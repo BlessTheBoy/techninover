@@ -33,12 +33,12 @@ export default function TodoColumn({
           <Plus />
         </Link>
       </div>
-      <div className="space-y-4" ref={setNodeRef}>
-        <SortableContext
-          id={"todo"}
-          items={todoTasks}
-          strategy={verticalListSortingStrategy}
-        >
+      <SortableContext
+        id={"todo"}
+        items={todoTasks}
+        strategy={verticalListSortingStrategy}
+      >
+        <div className="grid grid-cols-1 gap-4 min-h-16" ref={setNodeRef}>
           {todoTasks.map((task) => (
             <SortableItem
               key={task.id}
@@ -46,8 +46,8 @@ export default function TodoColumn({
               task={task}
             />
           ))}
-        </SortableContext>
-      </div>
+        </div>
+      </SortableContext>
     </div>
   );
 }

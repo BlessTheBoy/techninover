@@ -27,7 +27,7 @@ export function DatePicker({
   return (
     <div className="grid items-center gap-1.5 relative flex-1">
       {label ? (
-        <label className="font-inter font-medium text-sm text-text_header">
+        <label className="font-inter font-medium text-sm text-text_header dark:text-darkText_header">
           {label}{" "}
           {optional ? <span className="font-normal">(Optional)</span> : null}
         </label>
@@ -36,7 +36,7 @@ export function DatePicker({
         <PopoverTrigger>
           <div
             className={clsx(
-              "h-12 rounded-xl border border-gray_8 w-full px-[14px] outline-purple flex gap-2 items-center cursor-pointer select-none z-0",
+              "h-12 rounded-xl border border-gray_8 dark:border-darkGray_8 w-full px-[14px] outline-purple flex gap-2 items-center cursor-pointer select-none z-0",
               {
                 "text-[#848585]": !date,
               }
@@ -45,7 +45,7 @@ export function DatePicker({
             <p className="flex-1 text-left">
               {date ? moment(date).format("MMMM Do YYYY") : "Select date"}
             </p>
-            <CalendarIcon />
+            <CalendarIcon className="dark:fill-white" />
           </div>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">

@@ -1,6 +1,6 @@
-import React from 'react'
+import React from "react";
 
-export default function UploadIcon() {
+export default function UploadIcon({ dark }: { dark?: boolean }) {
   return (
     <svg
       width="47"
@@ -9,7 +9,15 @@ export default function UploadIcon() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect x="3.5" y="3" width="40" height="40" rx="20" fill="#F2F4F7" />
+      <rect
+        x="3.5"
+        y="3"
+        width="40"
+        height="40"
+        rx="20"
+        fill="#F2F4F7"
+        className="dark:fill-[#121212]"
+      />
       <rect
         x="3.5"
         y="3"
@@ -18,6 +26,7 @@ export default function UploadIcon() {
         rx="20"
         stroke="#F9FAFB"
         strokeWidth="6"
+        className="dark:stroke-[#171717]"
       />
       <g clipPath="url(#clip0_2001_556)">
         <path

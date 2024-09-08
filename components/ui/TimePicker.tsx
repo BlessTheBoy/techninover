@@ -10,7 +10,7 @@ export function TimePicker({
   setTime,
   label,
   optional,
-  error
+  error,
 }: {
   time?: Date;
   setTime: (v: Date | undefined) => void;
@@ -23,7 +23,7 @@ export function TimePicker({
   return (
     <div className="grid items-center gap-1.5 relative flex-1">
       {label ? (
-        <label className="font-inter font-medium text-sm text-text_header">
+        <label className="font-inter font-medium text-sm text-text_header dark:text-darkText_header">
           {label}{" "}
           {optional ? <span className="font-normal">(Optional)</span> : null}
         </label>
@@ -44,7 +44,7 @@ export function TimePicker({
         />
         <div
           className={clsx(
-            "h-12 rounded-xl border border-gray_8 w-full px-[14px] z-0 outline-purple flex gap-2 items-center cursor-pointer select-none",
+            "h-12 rounded-xl border border-gray_8 dark:border-darkGray_8 w-full px-[14px] z-0 outline-purple flex gap-2 items-center cursor-pointer select-none",
             {
               "text-[#848585]": !time,
             }
@@ -54,7 +54,7 @@ export function TimePicker({
           <p className="flex-1">
             {time ? moment(time).format("h:mm a") : "Select time"}
           </p>
-          <Clock />
+          <Clock className="dark:stroke-white" />
         </div>
       </div>
       {error ? <p className="text-error text-xs">{error}</p> : null}

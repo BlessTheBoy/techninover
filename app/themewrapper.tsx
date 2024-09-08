@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import FAB from "@/components/ui/FAB";
 import { Toaster } from "@/components/ui/toaster";
 import { Suspense, useEffect, useState } from "react";
@@ -13,13 +13,13 @@ export default function Themewrapper({
 }: {
   children: React.ReactNode;
 }) {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState<undefined | boolean>();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // Check if user has a theme preference in localStorage
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
-      setDarkMode(savedTheme === "dark");
+      setDarkMode(savedTheme == "dark");
     } else {
       // If no saved preference, check system preference
       const prefersDark = window.matchMedia(
@@ -31,6 +31,7 @@ export default function Themewrapper({
 
   useEffect(() => {
     // Update the class on the html element when darkMode changes
+    if (darkMode === undefined) return;
     if (darkMode) {
       document.documentElement.classList.add("dark");
       localStorage.setItem("theme", "dark");
@@ -44,6 +45,8 @@ export default function Themewrapper({
     setDarkMode(!darkMode);
   };
 
+  if (darkMode === undefined) return null;
+
   return (
     <>
       <div className="flex h-screen flex-col md:flex-row overflow-auto md:overflow-hidden bg-white dark:bg-darkWhite dark:text-white">
@@ -54,7 +57,7 @@ export default function Themewrapper({
               onClick={toggleTheme}
               variant="outline"
               size="icon"
-              className="absolute top-4 right-4 md:mb-4 md:ml-4 md:static"
+              className="absolute top-4 right-4 md:mb-4 md:ml-4 md:static dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-800 dark:hover:text-slate-50"
             >
               {darkMode ? (
                 <Sun className="h-[1.2rem] w-[1.2rem]" />

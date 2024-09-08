@@ -92,14 +92,11 @@ export default function TaskCard({
     <div
       id={String(task.id)}
       className={clsx(
-        "space-y-4 p-4 rounded-md bg-white dark:bg-darkWhite dark:text-white shadow-card",
+        "space-y-4 p-4 rounded-md bg-white dark:bg-[#171717] dark:text-white shadow-card",
         {
           "cursor-move": overlay,
         }
       )}
-      style={{
-        background: "#171717",
-      }}
     >
       <div {...attributes} {...listeners}>
         {task.priority ? (

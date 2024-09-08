@@ -75,7 +75,7 @@ export default function ImageUploader({
   return (
     <div className="grid items-center gap-1.5">
       {label ? (
-        <label className="font-inter font-medium text-sm text-text_header">
+        <label className="font-inter font-medium text-sm text-text_header dark:text-darkText_header">
           {label}{" "}
           {optional ? <span className="font-normal">(Optional)</span> : null}
         </label>
@@ -83,7 +83,7 @@ export default function ImageUploader({
 
       <div
         className={`relative p-4 rounded-xl border ${
-          dragActive ? "border-purple bg-purple_bg" : "border-gray_8"
+          dragActive ? "border-purple bg-purple_bg dark:bg-purple/20" : "border-gray_8 dark:border-darkGray_8"
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -110,11 +110,11 @@ export default function ImageUploader({
             </div>
             <div className="flex gap-1 flex-1">
               <div className="flex-1">
-                <p className="font-inter font-medium text-sm text-[#344054] text-ellipsis line-clamp-2">
+                <p className="font-inter font-medium text-sm text-[#344054] dark:text-darkText_header text-ellipsis line-clamp-2">
                   {fileName ?? "Cover image"}
                 </p>
                 {fileSize ? (
-                  <p className="font-inter font-normal text-sm text-gray_9">
+                  <p className="font-inter font-normal text-sm text-gray_9 dark:text-darkText_paragraph">
                     {formatFileSize(fileSize)}
                   </p>
                 ) : null}
@@ -126,7 +126,7 @@ export default function ImageUploader({
                   setFileSize(undefined);
                   inputRef.current!.value = "";
                 }}
-                className="group flex items-center justify-center h-6 w-6 rounded hover:bg-error_bg self-center border border-gray_6"
+                className="group flex items-center justify-center h-6 w-6 rounded hover:bg-error_bg dark:hover:bg-error/30 self-center border border-gray_6 dark:border-darkGray_6"
               >
                 <Trash className="group-hover:fill-error group-hover:stroke-error" />
               </button>
@@ -139,7 +139,7 @@ export default function ImageUploader({
               <p className="font-inter font-normal text-sm text-gray_9 text-center">
                 <span
                   onClick={onButtonClick}
-                  className="font-medium text-purple inline-block cursor-pointer hover:bg-purple_bg select-none"
+                  className="font-medium text-purple inline-block cursor-pointer hover:bg-purple_bg hover:bg-purple/30 select-none"
                 >
                   Click to upload
                 </span>{" "}

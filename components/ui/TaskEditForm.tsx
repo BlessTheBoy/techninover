@@ -152,7 +152,7 @@ export default function TaskEditForm({ id }: { id: number }) {
           defaultValue={task?.description ?? undefined}
         />
         <div className="grid items-center gap-1.5">
-          <label className="font-inter font-medium text-sm text-text_header">
+          <label className="font-inter font-medium text-sm text-text_header dark:text-darkText_header">
             Status
           </label>
           <Select
@@ -196,7 +196,7 @@ export default function TaskEditForm({ id }: { id: number }) {
           ) : null}
         </div>
         <div className="grid items-center gap-1.5">
-          <label className="font-inter font-medium text-sm text-text_header">
+          <label className="font-inter font-medium text-sm text-text_header dark:text-darkText_header">
             Priority
           </label>
           <Select
@@ -215,15 +215,15 @@ export default function TaskEditForm({ id }: { id: number }) {
                   className={clsx(
                     "h-6 px-2 rounded-[0.25rem] flex justify-center items-center w-fit text-[#848585]",
                     {
-                      "bg-success_bg text-success font-inter font-medium text-xs":
+                      "bg-success_bg dark:bg-success/30 text-success font-inter font-medium text-xs":
                         taskData.priority == "high",
                     },
                     {
-                      "bg-medium_bg text-medium font-inter font-medium text-xs":
+                      "bg-medium_bg  dark:bg-medium/30 text-medium font-inter font-medium text-xs":
                         taskData.priority == "medium",
                     },
                     {
-                      "bg-error_bg text-error font-inter font-medium text-xs":
+                      "bg-error_bg  dark:bg-error/30 text-error font-inter font-medium text-xs":
                         taskData.priority == "low",
                     }
                   )}

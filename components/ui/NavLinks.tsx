@@ -59,7 +59,10 @@ export default function NavLinks() {
               className={clsx(
                 "w-6 md:w-9 group-hover:fill-purple group-hover:stroke-purple",
                 {
-                  "fill-purple stroke-purple": pathname === link.href,
+                  "fill-purple stroke-purple":
+                    pathname === link.href ||
+                    (link.href === "/" &&
+                      !["/inbox", "/notes", "/todo"].includes(pathname)),
                 }
               )}
             />

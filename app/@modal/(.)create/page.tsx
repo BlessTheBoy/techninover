@@ -15,7 +15,7 @@ export default function Page() {
 
   return (
     <Dialog defaultOpen onOpenChange={() => router.back()}>
-      <DialogContent className="max-h-[90vh] overflow-auto">
+      <DialogContent className="max-h-[90vh] overflow-auto ">
         <DialogHeader>
           <DialogTitle className="font-sfPro font-semibold text-2xl">
             Add Task

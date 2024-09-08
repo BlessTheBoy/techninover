@@ -155,9 +155,9 @@ export default function Page({ params }: { params: { id: string } }) {
       <div className="flex items-center gap-4">
         <Link
           href="/"
-          className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100"
+          className="w-10 h-10 rounded-full border border-gray_1 dark:border-darkGray_1 flex justify-center items-center hover:bg-gray-100 dark:hover:bg-darkGray_1 cursor-pointer"
         >
-          <LeftArrow />
+          <LeftArrow className="dark:fill-white" />
         </Link>
         <p className="font-sfPro font-semibold text-xl md:text-3xl grow md:flex-grow-0">
           Edit Task
@@ -185,7 +185,7 @@ export default function Page({ params }: { params: { id: string } }) {
               defaultValue={task?.description ?? undefined}
             />
             <div className="grid items-center gap-1.5">
-              <label className="font-inter font-medium text-sm text-text_header">
+              <label className="font-inter font-medium text-sm text-text_header dark:text-darkText_header">
                 Status
               </label>
               <Select
@@ -229,7 +229,7 @@ export default function Page({ params }: { params: { id: string } }) {
               ) : null}
             </div>
             <div className="grid items-center gap-1.5">
-              <label className="font-inter font-medium text-sm text-text_header">
+              <label className="font-inter font-medium text-sm text-text_header dark:text-darkText_header">
                 Priority
               </label>
               <Select
@@ -248,15 +248,15 @@ export default function Page({ params }: { params: { id: string } }) {
                       className={clsx(
                         "h-6 px-2 rounded-[0.25rem] flex justify-center items-center w-fit text-[#848585]",
                         {
-                          "bg-success_bg text-success font-inter font-medium text-xs":
+                          "bg-success_bg dark:bg-success/30 text-success font-inter font-medium text-xs":
                             taskData.priority == "high",
                         },
                         {
-                          "bg-medium_bg text-medium font-inter font-medium text-xs":
+                          "bg-medium_bg dark:bg-medium/30 text-medium font-inter font-medium text-xs":
                             taskData.priority == "medium",
                         },
                         {
-                          "bg-error_bg text-error font-inter font-medium text-xs":
+                          "bg-error_bg dark:bg-error/30 text-error font-inter font-medium text-xs":
                             taskData.priority == "low",
                         }
                       )}

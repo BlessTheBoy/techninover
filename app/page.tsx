@@ -71,7 +71,7 @@ export default function Home() {
   };
 
   const taskDate = searchParams.get("date");
-  console.log("taskDate", taskDate);
+  // console.log("taskDate", taskDate);
   const { toast } = useToast();
   const [currentDate, setCurrentDate] = useState<Date>(
     taskDate ? new Date(taskDate) : new Date()

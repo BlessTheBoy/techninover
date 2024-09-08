@@ -5,10 +5,10 @@ export default function TaskListLoader() {
   return (
     <div className="mt-8 px-[6px] py-4 grid grid-cols-3 gap-4 ">
       {/* column 1 */}
-      <div className="px-2 py-3 rounded-lg space-y-4 h-fit bg-gray_5">
+      <div className="px-2 py-3 rounded-lg space-y-4 h-fit bg-gray_5 dark:bg-darkGray_5">
         <div className="flex justify-between items-center">
-          <Skeleton className="font-inter font-medium text-base w-20 h-6 bg-gray-200" />
-          <Skeleton className="w-6 h-6 bg-gray-200 rounded-[0.25rem]"></Skeleton>
+          <Skeleton className="font-inter font-medium text-base w-20 h-6 bg-gray-200 dark:bg-gray-900" />
+          <Skeleton className="w-6 h-6 bg-gray-200 dark:bg-gray-900 rounded-[0.25rem]"></Skeleton>
         </div>
         <div className="grid grid-cols-1 gap-4">
           <CardLoader priority cover description={3} descriptionHalf />
@@ -18,10 +18,10 @@ export default function TaskListLoader() {
       </div>
 
       {/* column 2 */}
-      <div className="px-2 py-3 rounded-lg space-y-4 h-fit bg-gray_5">
+      <div className="px-2 py-3 rounded-lg space-y-4 h-fit bg-gray_5 dark:bg-darkGray_5">
         <div className="flex justify-between items-center">
-          <Skeleton className="font-inter font-medium text-base w-20 h-6 bg-gray-200" />
-          <Skeleton className="w-6 h-6 bg-gray-200 rounded-[0.25rem]"></Skeleton>
+          <Skeleton className="font-inter font-medium text-base w-20 h-6 bg-gray-200 dark:bg-gray-900" />
+          <Skeleton className="w-6 h-6 bg-gray-200 dark:bg-gray-900 rounded-[0.25rem]"></Skeleton>
         </div>
         <div className="grid grid-cols-1 gap-4">
           <CardLoader priority />
@@ -30,10 +30,10 @@ export default function TaskListLoader() {
       </div>
 
       {/* column 2 */}
-      <div className="px-2 py-3 rounded-lg space-y-4 h-fit bg-gray_5">
+      <div className="px-2 py-3 rounded-lg space-y-4 h-fit bg-gray_5 dark:bg-darkGray_5">
         <div className="flex justify-between items-center">
-          <Skeleton className="font-inter font-medium text-base w-20 h-6 bg-gray-200" />
-          <Skeleton className="w-6 h-6 bg-gray-200 rounded-[0.25rem]"></Skeleton>
+          <Skeleton className="font-inter font-medium text-base w-20 h-6 bg-gray-200 dark:bg-gray-900" />
+          <Skeleton className="w-6 h-6 bg-gray-200 dark:bg-gray-900 rounded-[0.25rem]"></Skeleton>
         </div>
         <div className="grid grid-cols-1 gap-4">
           <CardLoader priority cover />
@@ -57,7 +57,7 @@ export function CardLoader({
   descriptionHalf?: boolean;
 }) {
   return (
-    <div className="space-y-4 p-4 rounded-md bg-white">
+    <div className="space-y-4 p-4 rounded-md bg-white dark:bg-darkWhite">
       {priority ? <Skeleton className="h-6 w-16 rounded-[0.25rem]" /> : null}
       <div className="flex items-center justify-between gap-4">
         <Skeleton className="flex-1 h-6" />
@@ -105,7 +105,7 @@ export function MobileCardLoader({
   descriptionHalf?: boolean;
 }) {
   return (
-    <div className="space-y-4 p-4 bg-white border-b border-gray_8">
+    <div className="space-y-4 p-4 bg-white dark:bg-darkWhite border-b border-gray_8 dark:border-gray-700">
       {priority ? <Skeleton className="h-6 w-16 rounded-[0.25rem]" /> : null}
       <div className="flex items-center justify-between gap-4">
         <Skeleton className="flex-1 h-6" />

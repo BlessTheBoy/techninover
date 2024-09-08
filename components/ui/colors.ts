@@ -27,3 +27,19 @@ export const colors = {
   danger: "#E60C02",
   flagOrange: "#F76659",
 };
+
+export const darkColors = {
+  white: "#121212",
+  gray: {
+    1: "#303030",
+    4: "#272D30",
+    5: "#0D0D0D",
+    6: "#2F2F2F",
+    8: "#374151",
+  },
+  text: {
+    header: "#E5E5E5",
+    paragraph: "#CDD5DA",
+    paragraph2: "#6E7C87",
+  },
+};

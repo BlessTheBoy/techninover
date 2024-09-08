@@ -16,7 +16,7 @@ export default function InProgressColumn({
 }) {
   const { setNodeRef } = useDroppable({ id: "in-progress" });
   return (
-    <div className="px-2 py-3 rounded-lg bg-gray_5 space-y-4 h-fit">
+    <div className="px-2 py-3 rounded-lg bg-gray_5 dark:bg-darkGray_5  space-y-4 h-fit">
       <div className="flex justify-between items-center">
         <div className="flex gap-2 items-center">
           <p className="font-inter font-medium text-base">In progress</p>
@@ -26,7 +26,7 @@ export default function InProgressColumn({
         </div>
         <Link
           href={"/create?status=in-progress"}
-          className="hover:bg-gray-200 rounded-[0.25rem]"
+          className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-[0.25rem]"
         >
           <Plus />
         </Link>

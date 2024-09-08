@@ -1,9 +1,9 @@
-import type { Config } from "tailwindcss"
-import { colors } from "./components/ui/colors";
+import type { Config } from "tailwindcss";
+import { colors, darkColors } from "./components/ui/colors";
 import { text } from "stream/consumers";
 
 const config = {
-  darkMode: ["class"],
+  darkMode: "selector",
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
@@ -67,6 +67,15 @@ const config = {
         text_paragraph2: colors.text.paragraph2,
         danger: colors.danger,
         flagOrange: colors.flagOrange,
+        // Dark mode colors
+        darkWhite: darkColors.white,
+        darkGray_1: darkColors.gray[1],
+        darkGray_4: darkColors.gray[4],
+        darkGray_5: darkColors.gray[5],
+        darkGray_6: darkColors.gray[6],
+        darkGray_8: darkColors.gray[8],
+        darkText_header: darkColors.text.header,
+        darkText_paragraph: darkColors.text.paragraph,
       },
       boxShadow: {
         card: "0 3px 2px -2px rgba(0,0,0,0.06), 0 5px 3px -2px rgba(0,0,0,0.02)",
@@ -76,4 +85,4 @@ const config = {
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;
 
-export default config
+export default config;

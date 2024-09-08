@@ -167,7 +167,7 @@ export default function Home() {
               {formattedDate}
             </p>
             <div
-              className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100"
+              className="w-10 h-10 rounded-full border border-gray_1 dark:border-darkGray_1 flex justify-center items-center hover:bg-gray-100 dark:hover:bg-darkGray_1 cursor-pointer"
               onClick={() => {
                 const newDate = new Date(currentDate);
                 newDate.setDate(newDate.getDate() - 1);
@@ -175,10 +175,10 @@ export default function Home() {
                 setCurrentDate(newDate);
               }}
             >
-              <LeftArrow />
+              <LeftArrow className="dark:fill-white" />
             </div>
             <div
-              className="w-10 h-10 rounded-full border border-gray_1 flex justify-center items-center hover:bg-gray-100"
+              className="w-10 h-10 rounded-full border border-gray_1 dark:border-darkGray_1 flex justify-center items-center hover:bg-gray-100 dark:hover:bg-darkGray_1 cursor-pointer"
               onClick={() => {
                 const newDate = new Date(currentDate);
                 newDate.setDate(newDate.getDate() + 1);
@@ -186,14 +186,16 @@ export default function Home() {
                 setCurrentDate(newDate);
               }}
             >
-              <RightArrow />
+              <RightArrow className="dark:fill-white" />
             </div>
           </div>
           <Search className="md:grow-0 md:min-w-60" />
         </div>
 
         <div className="hidden md:block">
-          {tasks ? (
+          {isLoading ? (
+            <TaskListLoader />
+          ) : tasks ? (
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
@@ -219,18 +221,16 @@ export default function Home() {
                 {activeTask ? <TaskCard task={activeTask} overlay /> : null}
               </DragOverlay>
             </DndContext>
-          ) : (
-            <TaskListLoader />
-          )}
+          ) : null}
         </div>
       </main>
       <main className="block md:hidden">
-        <div className="flex border-b border-gray-400 px-2 sticky top-0 bg-white">
+        <div className="flex border-b border-gray-400 px-2 sticky top-0 bg-white dark:bg-transparent">
           <div
             className={clsx(
               "flex-1 flex gap-2 items-center justify-center py-2 rounded-t mb-[-2px] cursor-pointer",
               {
-                "bg-purple_bg text-purple border-b-[3px] border-purple":
+                "bg-purple_bg dark:bg-purple/20 text-purple border-b-[3px] border-purple":
                   activeColumn === "todo",
               }
             )}
@@ -250,7 +250,7 @@ export default function Home() {
             className={clsx(
               "flex-1 flex gap-2 items-center justify-center py-2 rounded-t mb-[-2px] cursor-pointer",
               {
-                "bg-purple_bg text-purple border-b-[3px] border-purple":
+                "bg-purple_bg dark:bg-purple/20 text-purple border-b-[3px] border-purple":
                   activeColumn === "in-progress",
               }
             )}
@@ -270,7 +270,7 @@ export default function Home() {
             className={clsx(
               "flex-1 flex gap-2 items-center justify-center py-2 rounded-t mb-[-2px] cursor-pointer",
               {
-                "bg-purple_bg text-purple border-b-[3px] border-purple":
+                "bg-purple_bg dark:bg-purple/20 text-purple border-b-[3px] border-purple":
                   activeColumn === "completed",
               }
             )}
@@ -279,15 +279,15 @@ export default function Home() {
             <p className="font-inter font-medium text-sm">Completed</p>
           </div>
         </div>
-        {tasks ? (
+        {isLoading ? (
+          <MobileTaskListLoader />
+        ) : tasks ? (
           <div className="space-y-4 pb-6">
             {tasks[activeColumn].map((task) => (
               <MobileTaskCard key={task.id} task={task} />
             ))}
           </div>
-        ) : (
-          <MobileTaskListLoader />
-        )}
+        ) : null}
       </main>
     </>
   );

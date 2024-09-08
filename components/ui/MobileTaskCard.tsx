@@ -78,20 +78,22 @@ export default function MobileTaskCard({ task }: { task: Task }) {
   return (
     <div
       id={String(task.id)}
-      className="space-y-4 p-4 bg-white border-b border-gray_8"
+      className="space-y-4 p-4 bg-white border-b border-gray_8 dark:border-darkGray_8 dark:bg-darkWhite dark:text-white"
     >
       {task.priority ? (
         <p
           className={clsx(
             "h-6 px-2 rounded-[0.25rem] flex justify-center items-center font-inter font-medium text-xs w-fit",
             {
-              "bg-success_bg text-success": task.priority == "high",
+              "bg-success_bg dark:bg-success/20 text-success":
+                task.priority == "high",
             },
             {
-              "bg-medium_bg text-medium": task.priority == "medium",
+              "bg-medium_bg dark:bg-medium/20 text-medium":
+                task.priority == "medium",
             },
             {
-              "bg-error_bg text-error": task.priority == "low",
+              "bg-error_bg dark:bg-error/20 text-error": task.priority == "low",
             }
           )}
         >
@@ -100,24 +102,24 @@ export default function MobileTaskCard({ task }: { task: Task }) {
       ) : null}
       <div className="space-y-4">
         <div className="flex items-end">
-          <p className="font-sfPro font-medium text-base text-ellipsis line-clamp-2 text-text_header flex-1">
+          <p className="font-sfPro font-medium text-base text-ellipsis line-clamp-2 text-text_header dark:text-darkText_header flex-1">
             {task.title}
           </p>
 
           <Popover>
-            <PopoverTrigger className="w-6 h-6 flex justify-center items-center border border-gray_6 hover:bg-gray-100 shadow-card rounded-md">
+            <PopoverTrigger className="w-6 h-6 flex justify-center items-center border border-gray_6 dark:border-darkGray_6 hover:bg-gray-100 dark:hover:bg-darkGray_5 shadow-card rounded-md">
               <MoreHorizontal />
             </PopoverTrigger>
             <PopoverContent className="w-fit p-0 border border-gray_8">
               <a
                 href={`task/${task.id}/edit`}
-                className="block w-full px-3 py-1 text-sm text-text_paragraph text-left hover:bg-gray-100"
+                className="block w-full px-3 py-1 text-sm text-text_paragraph dark:text-darkText_paragraph text-left hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 Edit
               </a>
               <button
                 className={clsx(
-                  "w-full px-3 py-1 text-sm text-danger text-left bg-white hover:bg-gray-100",
+                  "w-full px-3 py-1 text-sm text-danger text-left bg-white dark:bg-transparent dark:hover:bg-gray-800 hover:bg-gray-100",
                   {
                     "cursor-not-allowed opacity-50 bg-gray-100": isMutating,
                   }
@@ -135,11 +137,11 @@ export default function MobileTaskCard({ task }: { task: Task }) {
             alt={task.title}
             width={800}
             height={400}
-            className={`w-full h-auto rounded bg-gray-100`}
+            className={`w-full h-auto rounded bg-gray-100 dark:bg-slate-800`}
           />
         ) : null}
         {task.description ? (
-          <p className="text-sm tracking-tight text-ellipsis line-clamp-5 text-text_paragraph opacity-75">
+          <p className="text-sm tracking-tight text-ellipsis line-clamp-5 text-text_paragraph dark:text-darkText_paragraph opacity-75">
             {task.description}
           </p>
         ) : null}

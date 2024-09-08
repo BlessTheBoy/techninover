@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  UserGroupIcon,
-  HomeIcon,
-  DocumentDuplicateIcon,
-} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
@@ -51,9 +46,9 @@ export default function NavLinks() {
             key={link.name}
             href={link.href}
             className={clsx(
-              "group flex h-[48px] md:h-auto grow items-center justify-center gap-5 rounded-md p-3 text-sm font-medium hover:bg-purple_bg hover:text-purple md:flex-none md:justify-start md:p-5 md:rounded-none",
+              "group flex h-[48px] md:h-auto grow items-center justify-center gap-5 rounded-md p-3 text-sm font-medium hover:bg-purple/20 dark:text-[#65676D] hover:text-purple md:flex-none md:justify-start md:p-5 md:rounded-none",
               {
-                "bg-purple_bg text-purple md:border-r-[6px] border-purple":
+                "bg-purple/20 dark:text-purple text-purple md:border-r-[6px] border-purple":
                   pathname === link.href ||
                   (link.href === "/" &&
                     !["/inbox", "/notes", "/todo"].includes(pathname)),
@@ -68,7 +63,17 @@ export default function NavLinks() {
                 }
               )}
             />
-            <p className="hidden lg:block font-sfPro font-semibold text-lg">
+            <p
+              className={clsx(
+                "hidden lg:block font-sfPro font-semibold text-lg",
+                {
+                  "text-purple":
+                    pathname === link.href ||
+                    (link.href === "/" &&
+                      !["/inbox", "/notes", "/todo"].includes(pathname)),
+                }
+              )}
+            >
               {link.name}
             </p>
           </Link>

@@ -25,12 +25,12 @@ export default function Search({ className }: { className?: string }) {
         Search
       </label>
       <input
-        className="peer block w-full rounded-md border border-gray_4 py-[10px] pl-10 text-sm outline-purple placeholder:gray_2 font-inter shadow-sm shadow-shadow"
+        className="peer block w-full rounded-md border border-gray_4 dark:border-darkGray_4 py-[10px] pl-10 text-sm outline-purple placeholder:gray_2 font-inter shadow-sm shadow-shadow dark:text-white dark:bg-transparent dark:border-2"
         placeholder="Search"
         // onChange={(e) => handleSearch(e.target.value)}
         // defaultValue={searchParams.get("query")?.toString()}
       />
-      <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray_3 peer-focus:text-gray-900" />
+      <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray_3 peer-focus:text-gray-900 dark:peer-focus:text-gray-300" />
     </div>
   );
 }

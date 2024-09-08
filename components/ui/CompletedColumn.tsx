@@ -16,7 +16,7 @@ export default function CompletedColumn({
 }) {
   const { setNodeRef } = useDroppable({ id: "completed" });
   return (
-    <div className="px-2 py-3 rounded-lg bg-gray_5 space-y-4 h-fit">
+    <div className="px-2 py-3 rounded-lg bg-gray_5 dark:bg-darkGray_5 space-y-4 h-fit">
       <div className="flex justify-between items-center">
         <div className="flex gap-2 items-center">
           <p className="font-inter font-medium text-base">Completed</p>

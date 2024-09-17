@@ -225,7 +225,7 @@ export default function Home() {
         </div>
       </main>
       <main className="block md:hidden">
-        <div className="flex border-b border-gray-400 px-2 sticky top-0 bg-white dark:bg-transparent">
+        <div className="flex border-b border-gray-400 px-2 sticky top-0 bg-white dark:bg-darkWhite">
           <div
             className={clsx(
               "flex-1 flex gap-2 items-center justify-center py-2 rounded-t mb-[-2px] cursor-pointer",

@@ -124,13 +124,11 @@ export async function PUT(
   }
 
   try {
-    const taskBody: any = { ...activeTask, ...body };
-    delete taskBody.status;
     await prisma.task.update({
       where: {
         id: parseInt(id),
       },
-      data: taskBody,
+      data: { ...activeTask, ...body },
     });
     if (body.status !== activeTask?.status) {
       const order = await prisma.order
@@ -191,21 +189,21 @@ export async function PUT(
           ?.split(",")
           .map((id) => tasks.find((task) => task.id == parseInt(id)))
           .filter(Boolean) as Task[]
-      ).map((t) => ({ ...t, status: "todo" })) ?? [],
+      )?.map((t) => ({ ...t, status: "todo" })) ?? [],
     "in-progress":
       (
         order?.in_progress
           ?.split(",")
           .map((id) => tasks.find((task) => task.id == parseInt(id)))
           .filter(Boolean) as Task[]
-      ).map((t) => ({ ...t, status: "in-progress" })) ?? [],
+      )?.map((t) => ({ ...t, status: "in-progress" })) ?? [],
     completed:
       (
         order?.completed
           ?.split(",")
           .map((id) => tasks.find((task) => task.id == parseInt(id)))
           .filter(Boolean) as Task[]
-      ).map((t) => ({ ...t, status: "completed" })) ?? [],
+      )?.map((t) => ({ ...t, status: "completed" })) ?? [],
   };
 
   return Response.json(sortedTasks, { status: 200 });

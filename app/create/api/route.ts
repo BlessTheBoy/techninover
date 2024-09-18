@@ -28,11 +28,9 @@ export async function POST(request: NextRequest) {
   let task: Task;
 
   try {
-    const taskBody: any = {...body};
-    delete taskBody.status;
     task = await prisma.task
       .create({
-        data: taskBody,
+        data: body,
       })
       .then((task) => task as Task);
   } catch (error) {
@@ -101,21 +99,21 @@ export async function POST(request: NextRequest) {
           ?.split(",")
           .map((id) => tasks.find((task) => task.id == parseInt(id)))
           .filter(Boolean) as Task[]
-      ).map((t) => ({ ...t, status: "todo" })) ?? [],
+      )?.map((t) => ({ ...t, status: "todo" })) ?? [],
     "in-progress":
       (
         updatedOrder?.in_progress
           ?.split(",")
           .map((id) => tasks.find((task) => task.id == parseInt(id)))
           .filter(Boolean) as Task[]
-      ).map((t) => ({ ...t, status: "in-progress" })) ?? [],
+      )?.map((t) => ({ ...t, status: "in-progress" })) ?? [],
     completed:
       (
         updatedOrder?.completed
           ?.split(",")
           .map((id) => tasks.find((task) => task.id == parseInt(id)))
           .filter(Boolean) as Task[]
-      ).map((t) => ({ ...t, status: "completed" })) ?? [],
+      )?.map((t) => ({ ...t, status: "completed" })) ?? [],
   };
 
   return Response.json(sortedTasks, { status: 200 });

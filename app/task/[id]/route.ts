@@ -97,6 +97,9 @@ export async function PUT(
     return Response.json("Task not found", { status: 404 });
   }
 
+  console.log("cover", body.cover);
+  console.log("coverType", coverType);
+
   if (
     coverType === "string" &&
     body.cover?.includes(
@@ -117,7 +120,7 @@ export async function PUT(
   } else if (coverType === "undefined" && activeTask?.cover) {
     try {
       await del(activeTask.cover);
-      body.cover = undefined;
+      body.cover = null;
     } catch (error) {
       // return Response.json("Failed to delete image", { status: 500 });
     }

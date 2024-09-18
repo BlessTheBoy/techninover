@@ -14,7 +14,7 @@ const TaskSchema = z.object({
       invalid_type_error: 'must be "high", "medium" or "low"',
     })
     .optional(),
-  cover: z.string().optional(),
+  cover: z.string().optional().nullable(),
   deadline: z.string(),
   date: z.string(),
 });

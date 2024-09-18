@@ -97,8 +97,8 @@ export async function PUT(
     return Response.json("Task not found", { status: 404 });
   }
 
-  console.log("cover", body.cover);
-  console.log("coverType", coverType);
+  // console.log("cover", body.cover);
+  // console.log("coverType", coverType);
 
   if (
     coverType === "string" &&

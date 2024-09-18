@@ -15,7 +15,6 @@ model Task {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
-  status      String
   priority    String?
   date        String
   cover       String?

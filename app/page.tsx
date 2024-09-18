@@ -302,47 +302,49 @@ export default function Home() {
 
   async function handleDragEnd(event: DragEndEvent) {
     setActiveTask(undefined);
-    // console.log("handle drag end");
+    console.log("handle drag end");
     const { active, over } = event;
-    let newData: SortedTasks = {
-      todo: [],
-      "in-progress": [],
-      completed: [],
-    };
+    let newData: SortedTasks | undefined = undefined;
     const activeData: { containerId: Task["status"]; index: number } =
       active.data.current?.sortable;
     const overData: { containerId: Task["status"]; index: number } | undefined =
       over?.data.current?.sortable;
 
-    if (!overData || !(tasks && over && active.id !== over?.id)) return;
+    // console.log("active.id, over.id", active.id, activeData, over?.id, overData);
 
-    // console.log("active.id, over.id", activeData, overData);
+    if (!tasks || !over?.id) return;
 
-    if (activeData.containerId === overData.containerId) {
-      newData = {
-        ...tasks,
-        [activeData.containerId]: arrayMove(
-          tasks[activeData.containerId],
-          activeData.index,
-          overData.index
-        ),
-      };
-    } else {
-      newData = {
-        ...tasks,
-        [activeData.containerId]: tasks[activeData.containerId].filter(
-          (i) => i.id !== active.id
-        ),
-        [overData.containerId]: [
-          ...tasks[overData.containerId].slice(0, overData.index),
-          {
-            ...tasks[activeData.containerId][activeData.index],
-            status: overData.containerId,
-          },
-          ...tasks[overData.containerId].slice(overData.index),
-        ],
-      };
+    if (activeData.containerId === overData?.containerId) {
+      if (active.id === over?.id) {
+        newData = tasks;
+      } else {
+        newData = {
+          ...tasks,
+          [activeData.containerId]: arrayMove(
+            tasks[activeData.containerId],
+            activeData.index,
+            overData.index
+          ),
+        };
+      }
+    } else if (over?.id && !overData && typeof over?.id == "string") {
+      // const currentTask = [...tasks.todo, ...tasks["in-progress"], ...tasks.completed].find((i) => i.id === active.id);
+      // newData = {
+      //   ...tasks,
+      //   todo: tasks.todo.filter((i) => i.id !== active.id),
+      //   "in-progress": tasks["in-progress"].filter((i) => i.id !== active.id),
+      //   completed: tasks.completed.filter((i) => i.id !== active.id),
+      //   [activeData.containerId]: [
+      //     ...tasks[activeData.containerId].slice(0, activeData.index),
+      //     currentTask,
+      //     ...tasks[activeData.containerId].slice(activeData.index),
+      //   ],
+      // };
+      newData = tasks;
     }
+
+    if (!newData) return;
+
     const order: Order = {
       todo: newData.todo.map((i) => i.id).join(","),
       in_progress: newData["in-progress"].map((i) => i.id).join(","),

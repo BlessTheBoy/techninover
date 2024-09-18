@@ -35,20 +35,26 @@ export async function GET(
 
   const sortedTasks: SortedTasks = {
     todo:
-      (order?.todo
-        ?.split(",")
-        .map((id) => tasks.find((task) => task.id == parseInt(id)))
-        .filter(Boolean) as Task[]) ?? [],
+      (
+        order?.todo
+          ?.split(",")
+          .map((id) => tasks.find((task) => task.id == parseInt(id)))
+          .filter(Boolean) as Task[]
+      ).map((t) => ({ ...t, status: "todo" })) ?? [],
     "in-progress":
-      (order?.in_progress
-        ?.split(",")
-        .map((id) => tasks.find((task) => task.id == parseInt(id)))
-        .filter(Boolean) as Task[]) ?? [],
+      (
+        order?.in_progress
+          ?.split(",")
+          .map((id) => tasks.find((task) => task.id == parseInt(id)))
+          .filter(Boolean) as Task[]
+      ).map((t) => ({ ...t, status: "in-progress" })) ?? [],
     completed:
-      (order?.completed
-        ?.split(",")
-        .map((id) => tasks.find((task) => task.id == parseInt(id)))
-        .filter(Boolean) as Task[]) ?? [],
+      (
+        order?.completed
+          ?.split(",")
+          .map((id) => tasks.find((task) => task.id == parseInt(id)))
+          .filter(Boolean) as Task[]
+      ).map((t) => ({ ...t, status: "completed" })) ?? [],
   };
 
   return Response.json(sortedTasks, { status: 200 });

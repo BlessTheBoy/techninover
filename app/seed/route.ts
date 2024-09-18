@@ -4,9 +4,11 @@ const prisma = new PrismaClient();
 
 async function createTask(body: any) {
   try {
+    const taskBody: any = { ...body };
+    delete taskBody.status;
     const id = await prisma.task
       .create({
-        data: body,
+        data: taskBody,
       })
       .then((task) => task.id);
     return id;
@@ -85,7 +87,7 @@ async function seedTodo() {
     .filter((t) => t.status == "todo");
   console.log("todoTasks", todoTasks);
   const insertedTodos = await Promise.all(
-    todoTasks.map(async (todo) => createTask({ ...todo, date: "2024-09-10" }))
+    todoTasks.map(async (todo) => createTask({ ...todo, date: "2024-09-18" }))
   );
   const in_progressTasks = todos
     // .filter((t) => !t.cover)
@@ -93,7 +95,7 @@ async function seedTodo() {
   console.log("in_progressTasks", in_progressTasks);
   const insertedInProgress = await Promise.all(
     in_progressTasks.map(async (todo) =>
-      createTask({ ...todo, date: "2024-09-10" })
+      createTask({ ...todo, date: "2024-09-18" })
     )
   );
 
@@ -103,13 +105,13 @@ async function seedTodo() {
   console.log("completedTasks", completedTasks);
   const insertedCompleted = await Promise.all(
     completedTasks.map(async (todo) =>
-      createTask({ ...todo, date: "2024-09-10" })
+      createTask({ ...todo, date: "2024-09-18" })
     )
   );
 
   const updatedOrder = await prisma.order.create({
     data: {
-      date: "2024-09-10",
+      date: "2024-09-18",
       todo: insertedTodos.join(","),
       in_progress: insertedInProgress.join(","),
       completed: insertedCompleted.join(","),

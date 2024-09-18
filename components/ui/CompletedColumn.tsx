@@ -1,3 +1,5 @@
+'use client'
+
 import Link from "next/link";
 import React from "react";
 import Plus from "./svgs/plus";
@@ -6,6 +8,7 @@ import { Task } from "@/types";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableItem } from "./SortableItem";
+import { useSearchParams } from "next/navigation";
 
 export default function CompletedColumn({
   completedTasks,
@@ -14,6 +17,8 @@ export default function CompletedColumn({
   completedTasks: Task[];
   activeId: number | undefined;
 }) {
+  const searchParams = useSearchParams();
+  const taskDate = searchParams.get("date");
   const { setNodeRef } = useDroppable({ id: "completed" });
   return (
     <div className="px-2 py-3 rounded-lg bg-gray_5 dark:bg-darkGray_5 space-y-4 h-fit">
@@ -25,7 +30,11 @@ export default function CompletedColumn({
               </div> */}
         </div>
         <Link
-          href={"/create?status=completed"}
+          href={
+            taskDate
+              ? `/create?status=completed&date=${taskDate}`
+              : "/create?status=completed"
+          }
           className="hover:bg-gray-200 rounded-[0.25rem]"
         >
           <Plus />

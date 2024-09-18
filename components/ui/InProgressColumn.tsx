@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import React from "react";
 import Plus from "./svgs/plus";
@@ -6,6 +8,7 @@ import { Task } from "@/types";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableItem } from "./SortableItem";
+import { useSearchParams } from "next/navigation";
 
 export default function InProgressColumn({
   inProgressTasks,
@@ -14,6 +17,8 @@ export default function InProgressColumn({
   inProgressTasks: Task[];
   activeId: number | undefined;
 }) {
+  const searchParams = useSearchParams();
+  const taskDate = searchParams.get("date");
   const { setNodeRef } = useDroppable({ id: "in-progress" });
   return (
     <div className="px-2 py-3 rounded-lg bg-gray_5 dark:bg-darkGray_5  space-y-4 h-fit">
@@ -25,7 +30,11 @@ export default function InProgressColumn({
           </div>
         </div>
         <Link
-          href={"/create?status=in-progress"}
+          href={
+            taskDate
+              ? `/create?status=in-progress&date=${taskDate}`
+              : "/create?status=in-progress"
+          }
           className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-[0.25rem]"
         >
           <Plus />

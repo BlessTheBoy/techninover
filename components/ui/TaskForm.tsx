@@ -23,8 +23,8 @@ import { SortedTasks, Task } from "@/types";
 
 export default function TaskForm() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const taskDate = searchParams.get("date");
+  const router = useRouter();
   const { toast } = useToast();
   const currentDate = taskDate ?? new Date().toISOString().split("T")[0];
 

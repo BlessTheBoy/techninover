@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link";
 import React from "react";
 import Plus from "./svgs/plus";
@@ -8,6 +10,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableItem } from "@/components/ui/SortableItem";
+import { useSearchParams } from "next/navigation";
 
 export default function TodoColumn({
   todoTasks,
@@ -16,6 +19,8 @@ export default function TodoColumn({
   todoTasks: Task[];
   activeId: number | undefined;
 }) {
+  const searchParams = useSearchParams();
+  const taskDate = searchParams.get("date");
   const { setNodeRef } = useDroppable({ id: "todo" });
   return (
     <div className="px-2 py-3 rounded-lg bg-gray_5 dark:bg-darkGray_5 space-y-4 h-fit">
@@ -27,7 +32,11 @@ export default function TodoColumn({
           </div>
         </div>
         <Link
-          href="/create?status=todo"
+          href={
+            taskDate
+              ? `/create?status=todo&date=${taskDate}`
+              : "/create?status=todo"
+          }
           className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-[0.25rem]"
         >
           <Plus />
